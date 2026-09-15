@@ -1,0 +1,398 @@
+[
+  {
+    "index": 0,
+    "name": "Genesis",
+    "abbrev": "gn",
+    "chaptersCount": 50
+  },
+  {
+    "index": 1,
+    "name": "Exodus",
+    "abbrev": "ex",
+    "chaptersCount": 40
+  },
+  {
+    "index": 2,
+    "name": "Leviticus",
+    "abbrev": "lv",
+    "chaptersCount": 27
+  },
+  {
+    "index": 3,
+    "name": "Numbers",
+    "abbrev": "nm",
+    "chaptersCount": 36
+  },
+  {
+    "index": 4,
+    "name": "Deuteronomy",
+    "abbrev": "dt",
+    "chaptersCount": 34
+  },
+  {
+    "index": 5,
+    "name": "Joshua",
+    "abbrev": "js",
+    "chaptersCount": 24
+  },
+  {
+    "index": 6,
+    "name": "Judges",
+    "abbrev": "jud",
+    "chaptersCount": 21
+  },
+  {
+    "index": 7,
+    "name": "Ruth",
+    "abbrev": "rt",
+    "chaptersCount": 4
+  },
+  {
+    "index": 8,
+    "name": "1 Samuel",
+    "abbrev": "1sm",
+    "chaptersCount": 31
+  },
+  {
+    "index": 9,
+    "name": "2 Samuel",
+    "abbrev": "2sm",
+    "chaptersCount": 24
+  },
+  {
+    "index": 10,
+    "name": "1 Kings",
+    "abbrev": "1kgs",
+    "chaptersCount": 22
+  },
+  {
+    "index": 11,
+    "name": "2 Kings",
+    "abbrev": "2kgs",
+    "chaptersCount": 25
+  },
+  {
+    "index": 12,
+    "name": "1 Chronicles",
+    "abbrev": "1ch",
+    "chaptersCount": 29
+  },
+  {
+    "index": 13,
+    "name": "2 Chronicles",
+    "abbrev": "2ch",
+    "chaptersCount": 36
+  },
+  {
+    "index": 14,
+    "name": "Ezra",
+    "abbrev": "ezr",
+    "chaptersCount": 10
+  },
+  {
+    "index": 15,
+    "name": "Nehemiah",
+    "abbrev": "ne",
+    "chaptersCount": 13
+  },
+  {
+    "index": 16,
+    "name": "Esther",
+    "abbrev": "et",
+    "chaptersCount": 10
+  },
+  {
+    "index": 17,
+    "name": "Job",
+    "abbrev": "job",
+    "chaptersCount": 42
+  },
+  {
+    "index": 18,
+    "name": "Psalms",
+    "abbrev": "ps",
+    "chaptersCount": 150
+  },
+  {
+    "index": 19,
+    "name": "Proverbs",
+    "abbrev": "prv",
+    "chaptersCount": 31
+  },
+  {
+    "index": 20,
+    "name": "Ecclesiastes",
+    "abbrev": "ec",
+    "chaptersCount": 12
+  },
+  {
+    "index": 21,
+    "name": "Song of Solomon",
+    "abbrev": "so",
+    "chaptersCount": 8
+  },
+  {
+    "index": 22,
+    "name": "Isaiah",
+    "abbrev": "is",
+    "chaptersCount": 66
+  },
+  {
+    "index": 23,
+    "name": "Jeremiah",
+    "abbrev": "jr",
+    "chaptersCount": 52
+  },
+  {
+    "index": 24,
+    "name": "Lamentations",
+    "abbrev": "lm",
+    "chaptersCount": 5
+  },
+  {
+    "index": 25,
+    "name": "Ezekiel",
+    "abbrev": "ez",
+    "chaptersCount": 48
+  },
+  {
+    "index": 26,
+    "name": "Daniel",
+    "abbrev": "dn",
+    "chaptersCount": 12
+  },
+  {
+    "index": 27,
+    "name": "Hosea",
+    "abbrev": "ho",
+    "chaptersCount": 14
+  },
+  {
+    "index": 28,
+    "name": "Joel",
+    "abbrev": "jl",
+    "chaptersCount": 3
+  },
+  {
+    "index": 29,
+    "name": "Amos",
+    "abbrev": "am",
+    "chaptersCount": 9
+  },
+  {
+    "index": 30,
+    "name": "Obadiah",
+    "abbrev": "ob",
+    "chaptersCount": 1
+  },
+  {
+    "index": 31,
+    "name": "Jonah",
+    "abbrev": "jn",
+    "chaptersCount": 4
+  },
+  {
+    "index": 32,
+    "name": "Micah",
+    "abbrev": "mi",
+    "chaptersCount": 7
+  },
+  {
+    "index": 33,
+    "name": "Nahum",
+    "abbrev": "na",
+    "chaptersCount": 3
+  },
+  {
+    "index": 34,
+    "name": "Habakkuk",
+    "abbrev": "hk",
+    "chaptersCount": 3
+  },
+  {
+    "index": 35,
+    "name": "Zephaniah",
+    "abbrev": "zp",
+    "chaptersCount": 3
+  },
+  {
+    "index": 36,
+    "name": "Haggai",
+    "abbrev": "hg",
+    "chaptersCount": 2
+  },
+  {
+    "index": 37,
+    "name": "Zechariah",
+    "abbrev": "zc",
+    "chaptersCount": 14
+  },
+  {
+    "index": 38,
+    "name": "Malachi",
+    "abbrev": "ml",
+    "chaptersCount": 4
+  },
+  {
+    "index": 39,
+    "name": "Matthew",
+    "abbrev": "mt",
+    "chaptersCount": 28
+  },
+  {
+    "index": 40,
+    "name": "Mark",
+    "abbrev": "mk",
+    "chaptersCount": 16
+  },
+  {
+    "index": 41,
+    "name": "Luke",
+    "abbrev": "lk",
+    "chaptersCount": 24
+  },
+  {
+    "index": 42,
+    "name": "John",
+    "abbrev": "jo",
+    "chaptersCount": 21
+  },
+  {
+    "index": 43,
+    "name": "Acts",
+    "abbrev": "act",
+    "chaptersCount": 28
+  },
+  {
+    "index": 44,
+    "name": "Romans",
+    "abbrev": "rm",
+    "chaptersCount": 16
+  },
+  {
+    "index": 45,
+    "name": "1 Corinthians",
+    "abbrev": "1co",
+    "chaptersCount": 16
+  },
+  {
+    "index": 46,
+    "name": "2 Corinthians",
+    "abbrev": "2co",
+    "chaptersCount": 13
+  },
+  {
+    "index": 47,
+    "name": "Galatians",
+    "abbrev": "gl",
+    "chaptersCount": 6
+  },
+  {
+    "index": 48,
+    "name": "Ephesians",
+    "abbrev": "eph",
+    "chaptersCount": 6
+  },
+  {
+    "index": 49,
+    "name": "Philippians",
+    "abbrev": "ph",
+    "chaptersCount": 4
+  },
+  {
+    "index": 50,
+    "name": "Colossians",
+    "abbrev": "cl",
+    "chaptersCount": 4
+  },
+  {
+    "index": 51,
+    "name": "1 Thessalonians",
+    "abbrev": "1ts",
+    "chaptersCount": 5
+  },
+  {
+    "index": 52,
+    "name": "2 Thessalonians",
+    "abbrev": "2ts",
+    "chaptersCount": 3
+  },
+  {
+    "index": 53,
+    "name": "1 Timothy",
+    "abbrev": "1tm",
+    "chaptersCount": 6
+  },
+  {
+    "index": 54,
+    "name": "2 Timothy",
+    "abbrev": "2tm",
+    "chaptersCount": 4
+  },
+  {
+    "index": 55,
+    "name": "Titus",
+    "abbrev": "tt",
+    "chaptersCount": 3
+  },
+  {
+    "index": 56,
+    "name": "Philemon",
+    "abbrev": "phm",
+    "chaptersCount": 1
+  },
+  {
+    "index": 57,
+    "name": "Hebrews",
+    "abbrev": "hb",
+    "chaptersCount": 13
+  },
+  {
+    "index": 58,
+    "name": "James",
+    "abbrev": "jm",
+    "chaptersCount": 5
+  },
+  {
+    "index": 59,
+    "name": "1 Peter",
+    "abbrev": "1pe",
+    "chaptersCount": 5
+  },
+  {
+    "index": 60,
+    "name": "2 Peter",
+    "abbrev": "2pe",
+    "chaptersCount": 3
+  },
+  {
+    "index": 61,
+    "name": "1 John",
+    "abbrev": "1jo",
+    "chaptersCount": 5
+  },
+  {
+    "index": 62,
+    "name": "2 John",
+    "abbrev": "2jo",
+    "chaptersCount": 1
+  },
+  {
+    "index": 63,
+    "name": "3 John",
+    "abbrev": "3jo",
+    "chaptersCount": 1
+  },
+  {
+    "index": 64,
+    "name": "Jude",
+    "abbrev": "jd",
+    "chaptersCount": 1
+  },
+  {
+    "index": 65,
+    "name": "Revelation",
+    "abbrev": "re",
+    "chaptersCount": 22
+  }
+]

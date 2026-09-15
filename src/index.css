@@ -1,0 +1,637 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom theme colors mapping to CSS variables */
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-primary-mid: var(--primary-mid);
+
+  /* Alias slate & gray to adapt to active themes globally */
+  --color-slate-50: var(--gray-50);
+  --color-slate-100: var(--gray-100);
+  --color-slate-200: var(--gray-200);
+  --color-slate-202: var(--gray-202);
+  --color-slate-205: var(--gray-202);
+  --color-slate-220: var(--gray-202);
+  --color-slate-300: var(--gray-300);
+  --color-slate-400: var(--gray-400);
+  --color-slate-500: var(--gray-500);
+  --color-slate-600: var(--gray-600);
+  --color-slate-700: var(--gray-700);
+  --color-slate-800: var(--gray-800);
+  --color-slate-900: var(--gray-900);
+
+  --color-gray-50: var(--gray-50);
+  --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
+  --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
+  --color-gray-600: var(--gray-600);
+  --color-gray-700: var(--gray-700);
+  --color-gray-800: var(--gray-800);
+  --color-gray-900: var(--gray-900);
+}
+
+:root {
+  --primary: #1a56db;
+  --primary-dark: #1342b0;
+  --primary-light: #e8f0fe;
+  --primary-mid: #4285f4;
+  --success: #0f7b3e;
+  --success-bg: #e6f4ea;
+  --danger: #c0392b;
+  --danger-bg: #fdecea;
+  --warning: #b45309;
+  --warning-bg: #fffbeb;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-202: #e2e8f0;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --card-bg: #ffffff;
+}
+
+/* =========================================================================
+   SISTEMA DE TEMAS DE SYNAPSIS: 2 VARIANTES OFICIALES
+   1. THEME 1: ACADEMIA CLÁSICA (Gris Slate Medio-Oscuro / Slate Academic)
+   2. THEME 2: CYBER MATRIX (Cuadrícula Neón & Azul Espacial)
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   THEME 1: ACADEMIA CLÁSICA (body.theme-academia)
+   ------------------------------------------------------------------------- */
+body.theme-academia,
+body.theme-default,
+body.theme-gray,
+body.theme-blue {
+  --primary: #1e40af;        /* Royal Navy Academic Blue */
+  --primary-dark: #1e3a8a;
+  --primary-light: #eff6ff;
+  --primary-mid: #3b82f6;
+  --success: #059669;
+  --success-bg: #ecfdf5;
+  --gray-50: #eef2f6;        /* Balanced Slate Gray Canvas */
+  --gray-101: #e2e8f0;
+  --gray-100: #f1f5f9;       /* Secondary inputs and stripes */
+  --gray-202: #cbd5e1;       /* Crisp slate borders */
+  --gray-200: #cbd5e1;
+  --gray-300: #94a3b8;
+  --gray-400: #64748b;
+  --gray-500: #475569;
+  --gray-600: #334155;
+  --gray-700: #1e293b;
+  --gray-800: #0f172a;       /* High-contrast crisp text */
+  --gray-900: #020617;
+  --card-bg: #ffffff;        /* Pure white cards */
+}
+
+body.theme-academia,
+body.theme-default,
+body.theme-gray,
+body.theme-blue {
+  background-color: var(--gray-50) !important;
+  color: var(--gray-800) !important;
+}
+
+body.theme-academia .card,
+body.theme-academia .theme-bg-surface,
+body.theme-academia header,
+body.theme-academia .modal,
+body.theme-default .card,
+body.theme-default .theme-bg-surface {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.theme-academia .sidebar,
+body.theme-default .sidebar,
+body.theme-gray .sidebar,
+body.theme-blue .sidebar {
+  background-color: #0f172a !important;
+  border-right: 1px solid #1e293b !important;
+}
+
+body.theme-academia .nav-item,
+body.theme-default .nav-item,
+body.theme-gray .nav-item,
+body.theme-blue .nav-item {
+  color: #94a3b8 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.theme-academia .nav-item:hover,
+body.theme-default .nav-item:hover,
+body.theme-gray .nav-item:hover,
+body.theme-blue .nav-item:hover {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+}
+
+body.theme-academia .nav-item.active,
+body.theme-default .nav-item.active,
+body.theme-gray .nav-item.active,
+body.theme-blue .nav-item.active {
+  background-color: #1e40af !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.4) !important;
+}
+
+body.theme-academia .nav-group-header,
+body.theme-default .nav-group-header,
+body.theme-gray .nav-group-header,
+body.theme-blue .nav-group-header {
+  color: #60a5fa !important;
+}
+
+body.theme-academia input,
+body.theme-academia select,
+body.theme-academia textarea,
+body.theme-academia .form-control {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--gray-50) !important;
+  color: var(--gray-800) !important;
+  transition: background-color 0.2s ease-in-out, color 0.18s ease-in-out;
+}
+
+/* Transform standard user inputs, textareas, selects to UPPERCASE with slightly smaller font size */
+input:not([type="email"]):not([type="password"]), 
+textarea, 
+select, 
+[contenteditable="true"] {
+  text-transform: uppercase;
+  font-size: 0.92em;
+  letter-spacing: 0.02em;
+}
+
+/* Auto-expanding textareas: strictly eliminate scrollbars and resize handles */
+textarea.auto-expand-textarea,
+.auto-expand-textarea {
+  overflow: hidden !important;
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+  resize: none !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+textarea.auto-expand-textarea::-webkit-scrollbar,
+.auto-expand-textarea::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Force email inputs and placeholders to remain LOWERCASE so full emails are visible and fit */
+input[type="email"],
+.user-email,
+.email-display {
+  text-transform: lowercase !important;
+  font-size: 0.85rem !important;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+input::placeholder, textarea::placeholder {
+  text-transform: uppercase;
+  font-size: 0.88em;
+}
+
+input[type="email"]::placeholder {
+  text-transform: none;
+}
+
+.theme-bg-surface {
+  background-color: var(--card-bg) !important;
+}
+.theme-border {
+  border-color: var(--gray-200) !important;
+}
+.theme-input {
+  background-color: var(--gray-100) !important;
+  border-color: var(--gray-250, var(--gray-200)) !important;
+}
+
+/* -------------------------------------------------------------------------
+   THEME 2: CYBER MATRIX (body.theme-cyber)
+   ------------------------------------------------------------------------- */
+body.theme-cyber,
+body.theme-cosmos,
+body.theme-cosmos-contraste {
+  --primary: #06b6d4;        /* Electric Neon Cyan */
+  --primary-dark: #0891b2;
+  --primary-light: rgba(6, 182, 212, 0.18);
+  --primary-mid: #22d3ee;
+  --success: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.2);
+  --danger: #f43f5e;
+  --danger-bg: rgba(244, 63, 94, 0.2);
+  --warning: #f59e0b;
+  --warning-bg: rgba(245, 158, 11, 0.2);
+  --gray-50: #030712;        /* Deep Cyber Dark Canvas */
+  --gray-101: #071322;       /* Row stripes & subpanels */
+  --gray-100: #071322;       /* Secondary backgrounds */
+  --gray-202: rgba(6, 182, 212, 0.3); /* Neon cyan borders */
+  --gray-200: rgba(6, 182, 212, 0.25);
+  --gray-300: #164e63;
+  --gray-400: #67e8f9;       /* Cyan support text */
+  --gray-500: #94a3b8;
+  --gray-600: #cbd5e1;
+  --gray-700: #e2e8f0;
+  --gray-800: #f8fafc;       /* Bright readable text */
+  --gray-900: #ffffff;       /* Pure white headers */
+  --card-bg: #071322;        /* Dark Cyber Panels */
+}
+
+/* Cyber Matrix Background with High-Precision Neon Grid & Atmospheric Ambient Glows */
+body.theme-cyber,
+body.theme-cosmos,
+body.theme-cosmos-contraste {
+  background-color: #030712 !important;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.2) 0%, transparent 65%),
+    radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 55%),
+    linear-gradient(rgba(6, 182, 212, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.09) 1px, transparent 1px) !important;
+  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px !important;
+  background-attachment: fixed !important;
+  color: #f1f5f9 !important;
+}
+
+/* Cyber Cards & Surfaces (Override bg-white everywhere in cyber mode) */
+body.theme-cyber .card,
+body.theme-cyber .theme-bg-surface,
+body.theme-cyber header,
+body.theme-cyber .modal,
+body.theme-cyber select.bg-white,
+body.theme-cyber div.bg-white,
+body.theme-cyber .bg-white,
+body.theme-cosmos .card,
+body.theme-cosmos .theme-bg-surface,
+body.theme-cosmos header,
+body.theme-cosmos .modal,
+body.theme-cosmos div.bg-white,
+body.theme-cosmos .bg-white,
+body.theme-cosmos-contraste .card,
+body.theme-cosmos-contraste .theme-bg-surface,
+body.theme-cosmos-contraste header,
+body.theme-cosmos-contraste .modal,
+body.theme-cosmos-contraste div.bg-white,
+body.theme-cosmos-contraste .bg-white {
+  background-color: #071322 !important;
+  border-color: rgba(6, 182, 212, 0.32) !important;
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.8), 0 0 16px -2px rgba(6, 182, 212, 0.12) !important;
+}
+
+/* Secondary Panels & Container Backgrounds */
+body.theme-cyber .bg-slate-50,
+body.theme-cyber .bg-slate-100,
+body.theme-cyber div.bg-slate-50,
+body.theme-cyber div.bg-slate-100,
+body.theme-cosmos .bg-slate-50,
+body.theme-cosmos .bg-slate-100,
+body.theme-cosmos div.bg-slate-50,
+body.theme-cosmos div.bg-slate-100,
+body.theme-cosmos-contraste .bg-slate-50,
+body.theme-cosmos-contraste .bg-slate-100 {
+  background-color: rgba(6, 182, 212, 0.05) !important;
+  border-color: rgba(6, 182, 212, 0.2) !important;
+}
+
+/* Inputs, Textareas, Selects & Controls */
+body.theme-cyber input,
+body.theme-cyber select,
+body.theme-cyber textarea,
+body.theme-cyber .form-control,
+body.theme-cosmos input,
+body.theme-cosmos select,
+body.theme-cosmos textarea,
+body.theme-cosmos .form-control,
+body.theme-cosmos-contraste input,
+body.theme-cosmos-contraste select,
+body.theme-cosmos-contraste textarea,
+body.theme-cosmos-contraste .form-control {
+  background-color: #030a14 !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  color: #ffffff !important;
+}
+
+body.theme-cyber input::placeholder,
+body.theme-cyber textarea::placeholder,
+body.theme-cosmos input::placeholder,
+body.theme-cosmos textarea::placeholder,
+body.theme-cosmos-contraste input::placeholder,
+body.theme-cosmos-contraste textarea::placeholder {
+  color: #64748b !important;
+}
+
+body.theme-cyber input:focus,
+body.theme-cyber select:focus,
+body.theme-cyber textarea:focus,
+body.theme-cosmos input:focus,
+body.theme-cosmos select:focus,
+body.theme-cosmos textarea:focus,
+body.theme-cosmos-contraste input:focus,
+body.theme-cosmos-contraste select:focus,
+body.theme-cosmos-contraste textarea:focus {
+  border-color: #22d3ee !important;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.4) !important;
+}
+
+/* Dropdown SearchableSelect overlays & Select Menus */
+body.theme-cyber .absolute.z-50,
+body.theme-cosmos .absolute.z-50,
+body.theme-cosmos-contraste .absolute.z-50 {
+  background-color: #05101c !important;
+  border: 1px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 16px rgba(6, 182, 212, 0.2) !important;
+}
+
+body.theme-cyber .absolute.z-50 .text-slate-700,
+body.theme-cosmos .absolute.z-50 .text-slate-700,
+body.theme-cosmos-contraste .absolute.z-50 .text-slate-700 {
+  color: #f1f5f9 !important;
+}
+
+body.theme-cyber .absolute.z-50 div:hover,
+body.theme-cosmos .absolute.z-50 div:hover,
+body.theme-cosmos-contraste .absolute.z-50 div:hover {
+  background-color: rgba(6, 182, 212, 0.18) !important;
+  color: #ffffff !important;
+}
+
+body.theme-cyber select option,
+body.theme-cosmos select option,
+body.theme-cosmos-contraste select option {
+  background-color: #05101c !important;
+  color: #ffffff !important;
+}
+
+body.theme-cyber [id*="select"] button,
+body.theme-cyber button[id*="select"],
+body.theme-cosmos [id*="select"] button,
+body.theme-cosmos button[id*="select"],
+body.theme-cosmos-contraste [id*="select"] button,
+body.theme-cosmos-contraste button[id*="select"] {
+  background-color: #030a14 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+}
+
+/* Tables in Cyber Matrix */
+body.theme-cyber th,
+body.theme-cosmos th,
+body.theme-cosmos-contraste th {
+  background-color: #040e18 !important;
+  color: #22d3ee !important;
+  border-color: rgba(6, 182, 212, 0.25) !important;
+}
+
+body.theme-cyber td,
+body.theme-cosmos td,
+body.theme-cosmos-contraste td {
+  border-color: rgba(6, 182, 212, 0.15) !important;
+  color: #f1f5f9 !important;
+}
+
+body.theme-cyber tr:hover,
+body.theme-cyber tr.hover\:bg-slate-50\/50:hover,
+body.theme-cyber .hover\:bg-slate-50:hover,
+body.theme-cosmos tr:hover,
+body.theme-cosmos-contraste tr:hover {
+  background-color: rgba(6, 182, 212, 0.08) !important;
+}
+
+/* Sidebar navigation in Cyber Matrix */
+body.theme-cyber .sidebar,
+body.theme-cosmos .sidebar,
+body.theme-cosmos-contraste .sidebar {
+  background-color: #02070e !important;
+  border-right: 1.5px solid rgba(6, 182, 212, 0.3) !important;
+  box-shadow: 4px 0 28px rgba(0, 0, 0, 0.8) !important;
+}
+
+body.theme-cyber .nav-item,
+body.theme-cosmos .nav-item,
+body.theme-cosmos-contraste .nav-item {
+  color: #94a3b8 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.theme-cyber .nav-item:hover,
+body.theme-cosmos .nav-item:hover,
+body.theme-cosmos-contraste .nav-item:hover {
+  background-color: rgba(6, 182, 212, 0.15) !important;
+  color: #22d3ee !important;
+}
+
+body.theme-cyber .nav-item.active,
+body.theme-cosmos .nav-item.active,
+body.theme-cosmos-contraste .nav-item.active {
+  background: linear-gradient(135deg, #06b6d4, #0284c7) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.5) !important;
+  font-weight: 700 !important;
+}
+
+body.theme-cyber .nav-group-header,
+body.theme-cosmos .nav-group-header,
+body.theme-cosmos-contraste .nav-group-header {
+  color: #22d3ee !important;
+  font-weight: 800 !important;
+}
+
+/* High Contrast Text overrides in Cyber Matrix */
+body.theme-cyber .text-slate-950,
+body.theme-cyber .text-slate-905,
+body.theme-cyber .text-slate-900,
+body.theme-cyber .text-slate-850,
+body.theme-cyber .text-slate-805,
+body.theme-cyber .text-slate-800,
+body.theme-cyber .text-slate-750,
+body.theme-cyber .text-slate-700,
+body.theme-cyber .text-slate-650,
+body.theme-cyber .text-slate-600,
+body.theme-cyber h1,
+body.theme-cyber h2,
+body.theme-cyber h3,
+body.theme-cyber h4,
+body.theme-cyber .user-name,
+body.theme-cosmos .text-slate-950,
+body.theme-cosmos .text-slate-900,
+body.theme-cosmos .text-slate-800,
+body.theme-cosmos .text-slate-700,
+body.theme-cosmos h1,
+body.theme-cosmos h2,
+body.theme-cosmos h3,
+body.theme-cosmos-contraste .text-slate-950,
+body.theme-cosmos-contraste .text-slate-900,
+body.theme-cosmos-contraste .text-slate-800,
+body.theme-cosmos-contraste .text-slate-700,
+body.theme-cosmos-contraste h1,
+body.theme-cosmos-contraste h2,
+body.theme-cosmos-contraste h3 {
+  color: #ffffff !important;
+}
+
+body.theme-cyber .text-slate-550,
+body.theme-cyber .text-slate-500,
+body.theme-cyber .text-slate-450,
+body.theme-cyber .text-slate-400,
+body.theme-cyber .logo-sub,
+body.theme-cosmos .text-slate-500,
+body.theme-cosmos .text-slate-400,
+body.theme-cosmos-contraste .text-slate-500,
+body.theme-cosmos-contraste .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+/* Badges, tags and accent buttons */
+body.theme-cyber .bg-indigo-50,
+body.theme-cyber .bg-indigo-100,
+body.theme-cosmos .bg-indigo-50,
+body.theme-cosmos .bg-indigo-100,
+body.theme-cosmos-contraste .bg-indigo-50,
+body.theme-cosmos-contraste .bg-indigo-100 {
+  background-color: rgba(6, 182, 212, 0.2) !important;
+  color: #22d3ee !important;
+  border-color: rgba(6, 182, 212, 0.4) !important;
+}
+
+body.theme-cyber .text-indigo-700,
+body.theme-cyber .text-indigo-600,
+body.theme-cyber .text-indigo-500,
+body.theme-cosmos .text-indigo-700,
+body.theme-cosmos .text-indigo-600,
+body.theme-cosmos-contraste .text-indigo-700,
+body.theme-cosmos-contraste .text-indigo-600 {
+  color: #22d3ee !important;
+}
+
+/* Secondary & Ghost buttons in Cyber Matrix */
+body.theme-cyber button.bg-white,
+body.theme-cyber button.bg-slate-100,
+body.theme-cyber button.bg-slate-50,
+body.theme-cosmos button.bg-white,
+body.theme-cosmos button.bg-slate-100,
+body.theme-cosmos button.bg-slate-50,
+body.theme-cosmos-contraste button.bg-white,
+body.theme-cosmos-contraste button.bg-slate-100,
+body.theme-cosmos-contraste button.bg-slate-50 {
+  background-color: rgba(6, 182, 212, 0.1) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+}
+
+body.theme-cyber button.bg-white:hover,
+body.theme-cyber button.bg-slate-100:hover,
+body.theme-cyber button.bg-slate-50:hover,
+body.theme-cosmos button.bg-white:hover,
+body.theme-cosmos button.bg-slate-100:hover,
+body.theme-cosmos button.bg-slate-50:hover,
+body.theme-cosmos-contraste button.bg-white:hover,
+body.theme-cosmos-contraste button.bg-slate-100:hover,
+body.theme-cosmos-contraste button.bg-slate-50:hover {
+  background-color: rgba(6, 182, 212, 0.22) !important;
+  color: #ffffff !important;
+  border-color: rgba(6, 182, 212, 0.6) !important;
+}
+
+body.theme-cyber button.bg-white svg,
+body.theme-cyber button.bg-slate-100 svg,
+body.theme-cyber button.bg-slate-50 svg,
+body.theme-cosmos button.bg-white svg,
+body.theme-cosmos button.bg-slate-100 svg,
+body.theme-cosmos-contraste button.bg-white svg {
+  color: #22d3ee !important;
+}
+
+body.theme-cyber .border-slate-100,
+body.theme-cyber .border-slate-200,
+body.theme-cosmos .border-slate-100,
+body.theme-cosmos .border-slate-200,
+body.theme-cosmos-contraste .border-slate-100,
+body.theme-cosmos-contraste .border-slate-200 {
+  border-color: rgba(6, 182, 212, 0.22) !important;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+/* GLOBAL HIGH-FIDELITY PRINT RULES */
+@media print {
+  header,
+  aside,
+  .sidebar,
+  .print\:hidden,
+  .fixed.bg-black\/35,
+  .modal-overlay,
+  .filters-meta,
+  .page-header button,
+  nav {
+    display: none !important;
+  }
+  
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    position: static !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    background-color: #ffffff !important;
+  }
+
+  body, html {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    padding: 6px 10px !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+  }
+}

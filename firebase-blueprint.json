@@ -1,0 +1,242 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile in Synapsis",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "email": { "type": "string" },
+        "pass": { "type": "string" },
+        "rol": { "type": "string", "enum": ["admin", "docente", "estudiante"] },
+        "creado": { "type": "string" },
+        "cedula": { "type": "string" },
+        "celular": { "type": "string" },
+        "asignaturas": { "type": "array" },
+        "semestre": { "type": "string" },
+        "codigo": { "type": "string" }
+      },
+      "required": ["id", "nombre", "email", "pass", "rol", "creado"]
+    },
+    "Institution": {
+      "title": "Institution",
+      "description": "Institution settings in Synapsis",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "tipo": { "type": "string" },
+        "codigo": { "type": "string" },
+        "ciudad": { "type": "string" },
+        "direccion": { "type": "string" },
+        "telefono": { "type": "string" },
+        "email": { "type": "string" },
+        "creado": { "type": "string" },
+        "actualizado": { "type": "string" }
+      },
+      "required": ["id", "nombre", "creado"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "Academic subjects",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "codigo": { "type": "string" },
+        "docenteId": { "type": "string" },
+        "creado": { "type": "string" },
+        "actualizado": { "type": "string" }
+      },
+      "required": ["id", "nombre", "creado"]
+    },
+    "Semester": {
+      "title": "Semester",
+      "description": "Academic semesters",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "codigo": { "type": "string" },
+        "estado": { "type": "string", "enum": ["activo", "inactivo"] },
+        "inicio": { "type": "string" },
+        "fin": { "type": "string" },
+        "creado": { "type": "string" },
+        "actualizado": { "type": "string" }
+      },
+      "required": ["id", "nombre", "estado", "creado"]
+    },
+    "Parcial": {
+      "title": "Parcial",
+      "description": "Academic periods/cuts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "semestre": { "type": "string" },
+        "asignatura": { "type": "string" },
+        "estado": { "type": "string", "enum": ["abierto", "cerrado"] },
+        "porcentaje": { "type": "number" },
+        "fechaInicio": { "type": "string" },
+        "fechaFin": { "type": "string" },
+        "creado": { "type": "string" },
+        "actualizado": { "type": "string" }
+      },
+      "required": ["id", "nombre", "semestre", "asignatura", "estado", "creado"]
+    },
+    "Exam": {
+      "title": "Exam",
+      "description": "Academic exams",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "titulo": { "type": "string" },
+        "subtitulo": { "type": "string" },
+        "materia": { "type": "string" },
+        "parcialId": { "type": "string" },
+        "descripcion": { "type": "string" },
+        "docenteId": { "type": "string" },
+        "estado": { "type": "string", "enum": ["borrador", "activo", "cerrado"] },
+        "tiempo": { "type": "number" },
+        "intentos": { "type": "number" },
+        "aprobacion": { "type": "number" },
+        "aleatorio": { "type": "boolean" },
+        "mostrarNota": { "type": "boolean" },
+        "creado": { "type": "string" },
+        "preguntas": { "type": "array" },
+        "bannerUrl": { "type": "string" }
+      },
+      "required": ["id", "titulo", "materia", "docenteId", "estado", "tiempo", "intentos", "aprobacion", "aleatorio", "mostrarNota", "creado", "preguntas"]
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "Student submissions for exams",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "examenId": { "type": "string" },
+        "estudianteId": { "type": "string" },
+        "estudianteNombre": { "type": "string" },
+        "respuestas": { "type": "object" },
+        "puntaje": { "type": "number" },
+        "aprobado": { "type": "boolean" },
+        "correctas": { "type": "number" },
+        "incorrectas": { "type": "number" },
+        "tiempoUsado": { "type": "string" },
+        "fecha": { "type": "string" },
+        "estado": { "type": "string", "enum": ["pendiente", "calificado"] },
+        "manualScores": { "type": "object" },
+        "manualComments": { "type": "object" },
+        "autoPuntaje": { "type": "number" },
+        "gradedBy": { "type": "string" },
+        "gradedAt": { "type": "string" }
+      },
+      "required": ["id", "examenId", "estudianteId", "estudianteNombre", "respuestas", "puntaje", "aprobado", "correctas", "incorrectas", "tiempoUsado", "fecha", "estado"]
+    },
+    "GradeRecord": {
+      "title": "GradeRecord",
+      "description": "Individual grade reports",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "estudianteId": { "type": "string" },
+        "asignaturaId": { "type": "string" },
+        "parcialId": { "type": "string" },
+        "nota": { "type": "number" },
+        "notaEV1": { "type": "number" },
+        "notaEV2": { "type": "number" },
+        "notaTrabajo": { "type": "number" },
+        "aprobado": { "type": "boolean" },
+        "comentario": { "type": "string" },
+        "creado": { "type": "string" },
+        "actualizado": { "type": "string" }
+      },
+      "required": ["id", "estudianteId", "asignaturaId", "parcialId", "nota", "aprobado", "creado"]
+    },
+    "Assignment": {
+      "title": "Assignment",
+      "description": "Class academic assignments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "titulo": { "type": "string" },
+        "descripcion": { "type": "string" },
+        "asignatura": { "type": "string" },
+        "semestre": { "type": "string" },
+        "parcialId": { "type": "string" },
+        "fechaEntrega": { "type": "string" },
+        "tipo": { "type": "string" },
+        "porcentaje": { "type": "number" },
+        "valor": { "type": "number" },
+        "puntos": { "type": "number" },
+        "creado": { "type": "string" },
+        "actualizado": { "type": "string" }
+      },
+      "required": ["id", "titulo", "creado"]
+    },
+    "AssignmentSubmission": {
+      "title": "AssignmentSubmission",
+      "description": "Student academic work submissions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "assignmentId": { "type": "string" },
+        "estudianteId": { "type": "string" },
+        "estudianteNombre": { "type": "string" },
+        "fechaEntrega": { "type": "string" },
+        "archivoNombre": { "type": "string" },
+        "archivoUrl": { "type": "string" },
+        "comentarioEstudiante": { "type": "string" },
+        "estado": { "type": "string", "enum": ["pendiente", "entregado", "calificado"] },
+        "calificacion": { "type": "number" },
+        "comentarioDocente": { "type": "string" },
+        "creado": { "type": "string" },
+        "actualizado": { "type": "string" }
+      },
+      "required": ["id", "assignmentId", "estudianteId", "estudianteNombre", "fechaEntrega", "archivoNombre", "archivoUrl", "estado", "creado"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": { "$ref": "entities/User" },
+      "description": "Users of Synapsis portal"
+    },
+    "institutions": {
+      "schema": { "$ref": "entities/Institution" },
+      "description": "Synapsis institution profiles"
+    },
+    "subjects": {
+      "schema": { "$ref": "entities/Subject" },
+      "description": "Academic subjects list"
+    },
+    "semesters": {
+      "schema": { "$ref": "entities/Semester" },
+      "description": "Academic semesters list"
+    },
+    "parciales": {
+      "schema": { "$ref": "entities/Parcial" },
+      "description": "Academic period cuts"
+    },
+    "exams": {
+      "schema": { "$ref": "entities/Exam" },
+      "description": "Exams lists"
+    },
+    "submissions": {
+      "schema": { "$ref": "entities/Submission" },
+      "description": "Exam submissions list"
+    },
+    "gradeRecords": {
+      "schema": { "$ref": "entities/GradeRecord" },
+      "description": "Individual grade reports list"
+    },
+    "assignments": {
+      "schema": { "$ref": "entities/Assignment" },
+      "description": "Assignments list"
+    },
+    "assignmentSubmissions": {
+      "schema": { "$ref": "entities/AssignmentSubmission" },
+      "description": "Student homework uploads list"
+    }
+  }
+}
