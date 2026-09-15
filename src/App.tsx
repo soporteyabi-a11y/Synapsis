@@ -21,7 +21,8 @@ import {
   ArrowRight,
   BookOpen,
   Globe,
-  KeyRound
+  KeyRound,
+  UserPlus
 } from 'lucide-react';
 
 import { 
@@ -82,6 +83,7 @@ import Biblia from './components/Biblia';
 import ShareAppModal from './components/ShareAppModal';
 import PasswordRecoveryModal from './components/PasswordRecoveryModal';
 import UserProfileModal from './components/UserProfileModal';
+import StudentRegisterModal from './components/StudentRegisterModal';
 
 export default function App() {
   // Database States
@@ -170,6 +172,24 @@ export default function App() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  const handleRegisterSuccess = (newUser: User, autoLogin: boolean) => {
+    updateUsers([...db.users, newUser]);
+
+    if (autoLogin) {
+      setCurrentUser(newUser);
+      localStorage.setItem('instituto_currentUser', JSON.stringify(newUser));
+      setActiveTab('dashboard');
+      showToast(`¡Bienvenido a Synapsis, ${newUser.nombre}! Tu cuenta ha sido creada.`, 'success');
+      setIsRegisterModalOpen(false);
+    } else {
+      setLoginEmail(newUser.email);
+      setLoginPass(newUser.pass);
+      setIsRegisterModalOpen(false);
+      showToast('Registro completado. Ya puedes ingresar con tus nuevas credenciales.', 'success');
+    }
+  };
 
   // Persist current active tab and active exam actions
   useEffect(() => {
@@ -258,10 +278,12 @@ export default function App() {
     let matchedUser = db.users.find(u => {
       const userEmail = (u.email || '').trim().toLowerCase();
       const userCode = (u.codigo || u.id.substring(0, 4)).trim().toLowerCase();
+      const userCedula = (u.cedula || '').trim().toLowerCase();
       const passMatch = u.pass === cleanPass || 
                         (u.pass || '').toLowerCase() === cleanPass.toLowerCase() || 
-                        userCode === cleanPass.toLowerCase();
-      return (userEmail === cleanEmail || userCode === cleanEmail) && passMatch;
+                        userCode === cleanPass.toLowerCase() ||
+                        userCedula === cleanPass.toLowerCase();
+      return (userEmail === cleanEmail || userCode === cleanEmail || userCedula === cleanEmail) && passMatch;
     });
 
     if (!matchedUser) {
@@ -781,11 +803,30 @@ export default function App() {
               </div>
             </div>
 
+            {/* Mode Switcher: Iniciar Sesión vs Registro de Estudiante */}
+            <div className="flex rounded-xl bg-slate-950/80 p-1 border border-slate-800/90 mb-4">
+              <button
+                type="button"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-bold text-white bg-indigo-600 shadow-sm flex items-center justify-center gap-1.5 cursor-default"
+              >
+                <UserIcon className="w-3.5 h-3.5 text-indigo-200" />
+                <span>Ingreso</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsRegisterModalOpen(true)}
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition cursor-pointer flex items-center justify-center gap-1.5 group"
+              >
+                <UserPlus className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span className="text-emerald-300 group-hover:text-emerald-200 font-bold">Nuevo Estudiante</span>
+              </button>
+            </div>
+
             {/* Form */}
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-slate-300 block mb-1.5 font-sans">
-                  Correo Institucional o Código
+                  Correo Institucional, Código o Cédula
                 </label>
                 <div className="relative rounded-xl border border-slate-700/80 bg-slate-950/60 transition-all focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
                   <UserIcon className="absolute left-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -796,7 +837,7 @@ export default function App() {
                     required
                     value={loginEmail}
                     onChange={e => setLoginEmail(e.target.value)}
-                    placeholder="usuario@synapsis.edu o código"
+                    placeholder="usuario@synapsis.edu, código o cédula"
                     className="w-full pl-10 pr-3.5 py-2.5 bg-transparent text-white text-sm outline-none placeholder:text-slate-500 font-medium"
                   />
                 </div>
@@ -844,7 +885,19 @@ export default function App() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </button>
 
-              <div className="text-center pt-2">
+              {/* Student Self-Registration Direct Access Button */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => setIsRegisterModalOpen(true)}
+                  className="w-full py-2.5 px-3.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-300 hover:text-emerald-200 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs group"
+                >
+                  <UserPlus className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <span>¿Eres nuevo estudiante? Regístrate aquí</span>
+                </button>
+              </div>
+
+              <div className="text-center pt-1">
                 <button
                   type="button"
                   onClick={() => setIsRecoveryModalOpen(true)}
@@ -1035,6 +1088,16 @@ export default function App() {
           toast={showToast}
         />
       )}
+
+      {/* STUDENT SELF-REGISTRATION MODAL */}
+      <StudentRegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        users={db.users}
+        semesters={db.semesters}
+        onRegisterSuccess={handleRegisterSuccess}
+        toast={showToast}
+      />
 
     </div>
   );
