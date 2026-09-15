@@ -86,15 +86,13 @@ function ensureValidQuestions(rawQuestions: any[]): Question[] {
       });
     }
 
-    const opcionIds: string[] = Array.isArray(q?.opcionIds) && q.opcionIds.length === opciones.length
-      ? [...q.opcionIds]
-      : opciones.map((_, i) => `opt_${id}_${i}_${uid()}`);
+    const existingOptIds = Array.isArray(q?.opcionIds) ? q.opcionIds : [];
+    const opcionIds: string[] = opciones.map((_, i) => existingOptIds[i] || `opt_${id}_${i}_${uid()}`);
 
     let enunciadoIds: string[] | undefined = undefined;
     if (tipo === 'matching' && enunciados) {
-      enunciadoIds = Array.isArray(q?.enunciadoIds) && q.enunciadoIds.length === enunciados.length
-        ? [...q.enunciadoIds]
-        : enunciados.map((_, i) => `enun_${id}_${i}_${uid()}`);
+      const existingEnunIds = Array.isArray(q?.enunciadoIds) ? q.enunciadoIds : [];
+      enunciadoIds = enunciados.map((_, i) => existingEnunIds[i] || `enun_${id}_${i}_${uid()}`);
     }
 
     return {

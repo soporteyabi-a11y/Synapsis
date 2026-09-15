@@ -311,7 +311,8 @@ export async function fetchFullStateFromFirestore(): Promise<AppState | null> {
         fetchCollectionFromFirestore<AssignmentSubmission>('assignmentSubmissions'),
       ]);
 
-      if (users.length === 0 && institutions.length === 0 && subjects.length === 0) {
+      const allCoreEmpty = users.length === 0 && institutions.length === 0 && subjects.length === 0 && exams.length === 0;
+      if (allCoreEmpty) {
         return null; // DB is completely fresh/empty
       }
 
