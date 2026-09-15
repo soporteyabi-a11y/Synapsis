@@ -4,10 +4,11 @@
  */
 
 import React, { useState } from 'react';
-import { Users, Plus, Trash2, Edit2, Search, BookOpen, GraduationCap, ChevronLeft, ChevronRight, Upload, Download, FileSpreadsheet, Sparkles, RefreshCw, Key } from 'lucide-react';
+import { Users, Plus, Trash2, Edit2, Search, BookOpen, GraduationCap, ChevronLeft, ChevronRight, Upload, Download, FileSpreadsheet, Sparkles, RefreshCw, Key, KeyRound } from 'lucide-react';
 import { User, Subject, Semester } from '../types';
 import { uid, now, fmtDate, avatarColor, avatarLetter, generateStudentCode } from '../lib/db';
 import { deleteDocFromFirestore, saveDocToFirestore } from '../lib/firebase';
+import AdminResetPasswordModal from './AdminResetPasswordModal';
 
 interface EstudiantesProps {
   users: User[];
@@ -23,6 +24,7 @@ export default function Estudiantes({
 }: EstudiantesProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [resetUserTarget, setResetUserTarget] = useState<User | null>(null);
 
   // Filter search
   const [query, setQuery] = useState('');
@@ -499,6 +501,13 @@ export default function Estudiantes({
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
+                        <button
+                          onClick={() => setResetUserTarget(st)}
+                          className="p-1 rounded border border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 cursor-pointer"
+                          title="Restablecer contraseña del estudiante"
+                        >
+                          <KeyRound className="w-3.5 h-3.5" />
+                        </button>
                         {confirmDeleteId === st.id ? (
                           <div className="flex items-center gap-1">
                             <button
@@ -866,6 +875,17 @@ export default function Estudiantes({
           </div>
         </div>
       )}
+
+      {/* ADMIN / DOCENTE RESET PASSWORD MODAL FOR STUDENT */}
+      <AdminResetPasswordModal
+        isOpen={!!resetUserTarget}
+        onClose={() => setResetUserTarget(null)}
+        targetUser={resetUserTarget}
+        onPasswordChanged={(updatedUser) => {
+          onUpdateUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+        }}
+        toast={toast}
+      />
     </div>
   );
 }

@@ -215,6 +215,41 @@ class BioCosmicSynth {
     if (this.windInterval) clearInterval(this.windInterval);
     if (this.padInterval) clearInterval(this.padInterval);
   }
+
+  public playTone(type: 'success' | 'tap' | 'info' = 'tap') {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = this.ctx || new AudioContextClass();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      const now = ctx.currentTime;
+      if (type === 'success') {
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else {
+        osc.frequency.setValueAtTime(600, now);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+    } catch {
+      // Ignore if autoplay policy blocks audio
+    }
+  }
+
+  public play(type: string = 'tap') {
+    this.playTone(type === 'success' ? 'success' : 'tap');
+  }
 }
 
 export const bioCosmicSynth = new BioCosmicSynth();

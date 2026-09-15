@@ -55,7 +55,9 @@ export function generateStudentCode(existingUsers: User[] = []): string {
 }
 
 /**
- * Genera automáticamente un código para una asignatura basado en su nombre o secuencia (ej. MAT-101, QUI-102, ASG-103).
+ * Genera automáticamente un código para una asignatura basado en su nombre y secuencia académica.
+ * No repite 101 para todas las materias; incrementa secuencialmente en el catálogo (101, 102, 103, 104...)
+ * y clasifica por niveles (serie 100, 200, 300...) según corresponda.
  */
 export function generateSubjectCode(nombre: string, existingSubjects: Subject[] = []): string {
   // Limpiar nombre y remover acentos
@@ -67,24 +69,59 @@ export function generateSubjectCode(nombre: string, existingSubjects: Subject[] 
     .replace(/[^A-Z0-9\s]/g, "");
 
   const words = clean.split(/\s+/).filter(Boolean);
+
+  // Palabras conectoras o números romanos que no deben considerarse para el prefijo de letras
+  const stopWords = new Set([
+    'DE', 'DEL', 'LA', 'LAS', 'EL', 'LOS', 'Y', 'E', 'EN', 'POR', 'PARA', 'CON', 'A', 'AL',
+    'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
+    '1', '2', '3', '4', '5', '6', '7', '8', '9'
+  ]);
+
+  const meaningfulWords = words.filter(w => !stopWords.has(w));
+  const wordsToUse = meaningfulWords.length > 0 ? meaningfulWords : words;
+
   let prefix = 'ASG';
 
-  if (words.length >= 3) {
-    prefix = words.slice(0, 3).map(w => w[0]).join('');
-  } else if (words.length === 2) {
-    prefix = (words[0].substring(0, 2) + words[1].substring(0, 1)).padEnd(3, 'X');
-  } else if (words.length === 1 && words[0].length >= 3) {
-    prefix = words[0].substring(0, 3);
-  } else if (words.length === 1 && words[0].length > 0) {
-    prefix = words[0].padEnd(3, 'X');
+  if (wordsToUse.length >= 3) {
+    prefix = wordsToUse.slice(0, 3).map(w => w[0]).join('');
+  } else if (wordsToUse.length === 2) {
+    prefix = (wordsToUse[0].substring(0, 2) + wordsToUse[1].substring(0, 1)).padEnd(3, 'X');
+  } else if (wordsToUse.length === 1 && wordsToUse[0].length >= 3) {
+    prefix = wordsToUse[0].substring(0, 3);
+  } else if (wordsToUse.length === 1 && wordsToUse[0].length > 0) {
+    prefix = wordsToUse[0].padEnd(3, 'X');
   }
 
-  // Buscar el siguiente número disponible para este prefijo
-  let num = 101;
-  const prefixCodes = existingSubjects
-    .map(s => (s.codigo || '').toUpperCase().trim())
-    .filter(c => c.startsWith(`${prefix}-`));
+  // Detección de nivel o año académico para asignar el bloque numérico correspondiente (100, 200, 300...)
+  let baseTier = 100;
+  if (/\b(VI|6|SEXTO|AVANZADO\s*2)\b/.test(clean)) {
+    baseTier = 600;
+  } else if (/\b(V|5|QUINTO)\b/.test(clean)) {
+    baseTier = 500;
+  } else if (/\b(IV|4|CUARTO)\b/.test(clean)) {
+    baseTier = 400;
+  } else if (/\b(III|3|TERCERO|AVANZADO)\b/.test(clean)) {
+    baseTier = 300;
+  } else if (/\b(II|2|SEGUNDO|INTERMEDIO)\b/.test(clean)) {
+    baseTier = 200;
+  }
 
+  // Extraer números existentes de asignaturas en el catálogo para el nivel correspondiente
+  const existingNumbers = existingSubjects
+    .map(s => {
+      const match = (s.codigo || '').match(/(\d{3})/);
+      return match ? parseInt(match[1], 10) : 0;
+    })
+    .filter(n => n >= baseTier && n < baseTier + 100);
+
+  // Calcular el siguiente número correlativo disponible
+  let num = baseTier + 1; // 101, 201, 301... por defecto si es la primera
+  if (existingNumbers.length > 0) {
+    const highest = Math.max(...existingNumbers);
+    num = Math.max(baseTier + 1, highest + 1);
+  }
+
+  // Garantizar que no colisione con ninguna asignatura existente
   while (existingSubjects.some(s => (s.codigo || '').toUpperCase().trim() === `${prefix}-${num}`)) {
     num++;
   }

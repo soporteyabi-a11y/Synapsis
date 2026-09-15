@@ -4,9 +4,10 @@
  */
 
 import React, { useState } from 'react';
-import { UserPlus, UserCheck, Trash2, Edit2, Shield, Calendar, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { UserPlus, UserCheck, Trash2, Edit2, Shield, Calendar, ChevronLeft, ChevronRight, Search, KeyRound } from 'lucide-react';
 import { User, Subject, Semester } from '../types';
 import { uid, now, fmtDate, avatarColor, avatarLetter } from '../lib/db';
+import AdminResetPasswordModal from './AdminResetPasswordModal';
 
 interface UsuariosProps {
   currentUser: User;
@@ -20,6 +21,7 @@ interface UsuariosProps {
 export default function Usuarios({ currentUser, users, subjects, semesters, onUpdateUsers, toast }: UsuariosProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [resetUserTarget, setResetUserTarget] = useState<User | null>(null);
 
   // Form states
   const [nombre, setNombre] = useState('');
@@ -282,9 +284,17 @@ export default function Usuarios({ currentUser, users, subjects, semesters, onUp
                         <div className="inline-flex gap-1.5 justify-end items-center">
                           <button
                             onClick={() => handleOpenEditModal(u)}
-                            className="p-1 rounded border border-slate-200 hover:bg-slate-100 text-slate-500"
+                            className="p-1 rounded border border-slate-200 hover:bg-slate-100 text-slate-500 cursor-pointer"
+                            title="Editar usuario"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setResetUserTarget(u)}
+                            className="p-1 rounded border border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 cursor-pointer"
+                            title="Restablecer contraseña del usuario"
+                          >
+                            <KeyRound className="w-3.5 h-3.5" />
                           </button>
                           {!isCurrent && (
                             confirmDeleteId === u.id ? (
@@ -455,6 +465,17 @@ export default function Usuarios({ currentUser, users, subjects, semesters, onUp
           </div>
         </div>
       )}
+
+      {/* ADMIN RESET PASSWORD MODAL */}
+      <AdminResetPasswordModal
+        isOpen={!!resetUserTarget}
+        onClose={() => setResetUserTarget(null)}
+        targetUser={resetUserTarget}
+        onPasswordChanged={(updatedUser) => {
+          onUpdateUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+        }}
+        toast={toast}
+      />
     </div>
   );
 }

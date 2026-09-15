@@ -20,7 +20,8 @@ import {
   ShieldCheck,
   ArrowRight,
   BookOpen,
-  Globe
+  Globe,
+  KeyRound
 } from 'lucide-react';
 
 import { 
@@ -79,6 +80,8 @@ import Finanzas from './components/Finanzas';
 import Educativo from './components/Educativo';
 import Biblia from './components/Biblia';
 import ShareAppModal from './components/ShareAppModal';
+import PasswordRecoveryModal from './components/PasswordRecoveryModal';
+import UserProfileModal from './components/UserProfileModal';
 
 export default function App() {
   // Database States
@@ -165,6 +168,8 @@ export default function App() {
   const [loginPass, setLoginPass] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Persist current active tab and active exam actions
   useEffect(() => {
@@ -335,6 +340,31 @@ export default function App() {
     setActiveTakeExamId(null);
     setActiveEditExamId(null);
     showToast('Sesión cerrada correctamente', 'success');
+  };
+
+  const handlePasswordRestored = (updatedUser: User, newPass: string) => {
+    const exists = db.users.some(u => u.id === updatedUser.id);
+    if (exists) {
+      updateUsers(db.users.map(u => u.id === updatedUser.id ? updatedUser : u));
+    } else {
+      updateUsers([...db.users, updatedUser]);
+    }
+    // Prefill form for instant login convenience
+    setLoginEmail(updatedUser.codigo || updatedUser.email);
+    setLoginPass(newPass);
+    setIsRecoveryModalOpen(false);
+    showToast(`¡Contraseña de ${updatedUser.nombre} actualizada correctamente! Ya puedes acceder.`, 'success');
+  };
+
+  const handleUpdateCurrentUser = (updatedUser: User) => {
+    setCurrentUser(updatedUser);
+    localStorage.setItem('instituto_currentUser', JSON.stringify(updatedUser));
+    const exists = db.users.some(u => u.id === updatedUser.id);
+    if (exists) {
+      updateUsers(db.users.map(u => u.id === updatedUser.id ? updatedUser : u));
+    } else {
+      updateUsers([...db.users, updatedUser]);
+    }
   };
 
   // State Updates proxies to keep master DB and Firestore in sync, permanently registering any deletions
@@ -775,6 +805,13 @@ export default function App() {
                   <label className="text-xs font-semibold text-slate-300 font-sans">
                     Contraseña
                   </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsRecoveryModalOpen(true)}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer transition-colors"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
                 </div>
                 <div className="relative rounded-xl border border-slate-700/80 bg-slate-950/60 transition-all focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
                   <Lock className="absolute left-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -804,6 +841,17 @@ export default function App() {
                 <span>Acceder al Portal</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </button>
+
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsRecoveryModalOpen(true)}
+                  className="text-xs text-slate-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1.5 cursor-pointer py-1 font-medium"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Restablecer o recuperar mi contraseña</span>
+                </button>
+              </div>
             </form>
 
             {/* Quick Demo Access Badges */}
@@ -885,6 +933,7 @@ export default function App() {
             onOpenShareModal={() => setIsShareModalOpen(true)}
             onSyncFirebase={handleManualSync}
             isSyncing={isSyncingFirebase}
+            onOpenProfileModal={() => setIsProfileModalOpen(true)}
           />
 
           <div className="flex-1 flex relative pt-[60px]">
@@ -963,6 +1012,27 @@ export default function App() {
         onSyncFirebase={handleManualSync}
         isSyncing={isSyncingFirebase}
       />
+
+      {/* SOLID SELF-SERVICE PASSWORD RECOVERY MODAL */}
+      <PasswordRecoveryModal
+        isOpen={isRecoveryModalOpen}
+        onClose={() => setIsRecoveryModalOpen(false)}
+        users={db.users}
+        onPasswordRestored={handlePasswordRestored}
+        toast={showToast}
+        initialIdentifier={loginEmail}
+      />
+
+      {/* IN-SESSION USER PROFILE AND PASSWORD UPDATE MODAL */}
+      {currentUser && (
+        <UserProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          currentUser={currentUser}
+          onUpdateCurrentUser={handleUpdateCurrentUser}
+          toast={showToast}
+        />
+      )}
 
     </div>
   );

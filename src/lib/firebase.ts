@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDocs, collection, onSnapshot, getDocFromServer, deleteDoc, getDoc } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -160,6 +160,47 @@ export async function deleteDocFromFirestore(collName: string, docId: string): P
     await deleteDoc(doc(db, collName, docId));
   } catch (error) {
     console.warn(`Firestore document deletion failed for ${collName}/${docId}:`, error);
+  }
+}
+
+/**
+ * Sends a password reset email via Firebase Authentication if the email exists.
+ */
+export async function sendFirebasePasswordReset(email: string): Promise<{ success: boolean; message: string }> {
+  try {
+    await sendPasswordResetEmail(auth, email.trim().toLowerCase());
+    return { success: true, message: 'Enlace oficial de recuperación enviado al correo registrado.' };
+  } catch (err: any) {
+    const code = err?.code || '';
+    if (code === 'auth/user-not-found') {
+      return { success: false, message: 'El correo no se encuentra registrado en el servicio de Firebase Auth.' };
+    }
+    return { success: false, message: err?.message || 'No se pudo enviar el correo de recuperación vía Firebase Auth.' };
+  }
+}
+
+/**
+ * Searches for a user in Firestore collection 'users' matching email, student/docent code, or cedula.
+ * Guarantees maximum solidity if local state is not yet loaded or when recovering access.
+ */
+export async function findUserInFirestore(identifier: string): Promise<User | null> {
+  if (!isFirestoreAvailable) return null;
+  try {
+    const clean = identifier.trim().toLowerCase();
+    const querySnapshot = await getDocs(collection(db, 'users'));
+    for (const d of querySnapshot.docs) {
+      const u = d.data() as User;
+      const uEmail = (u.email || '').trim().toLowerCase();
+      const uCode = (u.codigo || u.id.substring(0, 4)).trim().toLowerCase();
+      const uCedula = (u.cedula || '').trim().toLowerCase();
+      if (uEmail === clean || uCode === clean || uCedula === clean) {
+        return u;
+      }
+    }
+    return null;
+  } catch (e) {
+    console.warn('Error querying user directly from Firestore:', e);
+    return null;
   }
 }
 

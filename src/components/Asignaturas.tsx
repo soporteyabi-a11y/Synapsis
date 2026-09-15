@@ -393,7 +393,7 @@ export default function Asignaturas({ subjects, users, onUpdateSubjects, toast }
                       setCodigo((e.target as HTMLInputElement).value);
                       setIsCodeAuto(false);
                     }}
-                    placeholder="Ej / QUI-101"
+                    placeholder="Ej / QUI-104"
                     className="form-control w-full p-2 border rounded-lg text-sm focus:outline-indigo-650 bg-slate-50 font-mono font-bold text-indigo-900 uppercase"
                   />
                   <span className="absolute right-2.5 top-2.5 pointer-events-none">

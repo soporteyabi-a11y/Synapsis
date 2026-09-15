@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { LogOut, Monitor, Menu, Music, Volume2, VolumeX, Sparkles, Sprout, QrCode, Share2, RefreshCw, Cloud } from 'lucide-react';
+import { LogOut, Monitor, Menu, Music, Volume2, VolumeX, Sparkles, Sprout, QrCode, Share2, RefreshCw, Cloud, KeyRound, User as UserIcon } from 'lucide-react';
 import { User } from '../types';
 import { avatarColor, avatarLetter } from '../lib/db';
 import { bioCosmicSynth } from '../lib/audioEngine';
@@ -19,6 +19,7 @@ interface HeaderProps {
   onOpenShareModal?: () => void;
   onSyncFirebase?: () => void;
   isSyncing?: boolean;
+  onOpenProfileModal?: () => void;
 }
 
 export default function Header({ 
@@ -30,7 +31,8 @@ export default function Header({
   onToggleSidebar,
   onOpenShareModal,
   onSyncFirebase,
-  isSyncing = false
+  isSyncing = false,
+  onOpenProfileModal
 }: HeaderProps) {
   const roleLabel = {
     admin: 'Administrador',
@@ -146,28 +148,39 @@ export default function Header({
           </select>
         </div>
 
-        {/* User profile dropdown button */}
-        <div 
-          onClick={onLogout}
-          className="header-user flex items-center gap-2.5 cursor-pointer hover:bg-slate-100 p-1.5 rounded-lg transition-colors group"
-          title="Cerrar sesión"
-        >
-          <div 
-            className="user-avatar w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white shadow-sm"
-            style={{ backgroundColor: avatarColor(currentUser.nombre) }}
+        {/* User profile & password action */}
+        <div className="header-user flex items-center gap-1.5 p-1 rounded-xl hover:bg-slate-100 transition-colors">
+          <button
+            type="button"
+            onClick={onOpenProfileModal}
+            className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-200/60 transition cursor-pointer text-left group"
+            title="Ver mi perfil y cambiar contraseña"
           >
-            {avatarLetter(currentUser.nombre)}
-          </div>
-          <div className="user-info text-left hidden sm:block">
-            <div className="user-name text-[13px] font-semibold leading-tight text-slate-800" style={{ color: 'var(--gray-800)' }}>
-              {currentUser.nombre}
+            <div 
+              className="user-avatar w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white shadow-sm shrink-0"
+              style={{ backgroundColor: avatarColor(currentUser.nombre) }}
+            >
+              {avatarLetter(currentUser.nombre)}
             </div>
-            <div className="user-role text-[11px] font-medium text-slate-400">
-              {roleLabel}
+            <div className="user-info text-left hidden sm:block">
+              <div className="user-name text-[13px] font-semibold leading-tight text-slate-800 flex items-center gap-1" style={{ color: 'var(--gray-800)' }}>
+                <span>{currentUser.nombre}</span>
+                <KeyRound className="w-3 h-3 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+              </div>
+              <div className="user-role text-[11px] font-medium text-slate-400">
+                {roleLabel} {currentUser.codigo ? `(${currentUser.codigo})` : ''}
+              </div>
             </div>
-          </div>
+          </button>
           
-          <LogOut className="w-4 h-4 ml-1 text-slate-400 group-hover:text-red-600 transition-colors" />
+          <button
+            type="button"
+            onClick={onLogout}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+            title="Cerrar sesión"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>
