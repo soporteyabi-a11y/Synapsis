@@ -109,6 +109,7 @@ function ensureValidQuestions(rawQuestions: any[]): Question[] {
       enunciados,
       enunciadoIds,
       matchCorrectos,
+      maxSeleccionables: typeof q?.maxSeleccionables === 'number' ? q.maxSeleccionables : (tipo === 'checkbox' ? 3 : undefined),
     };
   });
 }
@@ -298,7 +299,7 @@ export default function ExamBuilder({
       } catch (err) {
         console.error('Auto-save error:', err);
       }
-    }, 700);
+    }, 350);
 
     return () => clearTimeout(updateTimer);
   }, [
@@ -320,16 +321,12 @@ export default function ExamBuilder({
   // Flush latest state immediately on beforeunload or unmount
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (isDirtyRef.current) {
-        saveCurrentExamImmediate();
-      }
+      saveCurrentExamImmediate();
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (isDirtyRef.current) {
-        saveCurrentExamImmediate();
-      }
+      saveCurrentExamImmediate();
     };
   }, []);
 
@@ -614,6 +611,18 @@ export default function ExamBuilder({
     }));
   };
 
+  const handleUpdateMaxSeleccionables = (qid: string, max: number) => {
+    notifyUserEdit();
+    setQuestions(prev => prev.map(q => {
+      if (q.id === qid) {
+        // If current correct answers exceed new limit, prune excess
+        const nextCorrect = q.correctas.slice(0, max);
+        return { ...q, maxSeleccionables: max, correctas: nextCorrect };
+      }
+      return q;
+    }));
+  };
+
   const handleToggleCorrect = (qid: string, oIdx: number) => {
     notifyUserEdit();
     setQuestions(prev => prev.map(q => {
@@ -622,10 +631,15 @@ export default function ExamBuilder({
         if (q.tipo === 'multiple' || q.tipo === 'dropdown' || q.tipo === 'tf') {
           nextCorrect = [oIdx];
         } else {
-          // Checkbox allowing multiple correct selectors
+          // Checkbox allowing multiple correct selectors up to maxSeleccionables
           if (q.correctas.includes(oIdx)) {
             nextCorrect = q.correctas.filter(c => c !== oIdx);
           } else {
+            const max = q.maxSeleccionables || 3;
+            if (q.correctas.length >= max) {
+              toast(`Has alcanzado el límite máximo configurado (${max} respuestas correctas)`, 'warning');
+              return q;
+            }
             nextCorrect = [...q.correctas, oIdx];
           }
         }
@@ -764,9 +778,11 @@ export default function ExamBuilder({
   };
 
   const handleBack = async () => {
-    if (isDirtyRef.current) {
-      setSaveStatus('saving');
+    setSaveStatus('saving');
+    try {
       await saveCurrentExamImmediate();
+    } catch (err) {
+      console.error('Error saving exam on back:', err);
     }
     onBack();
   };
@@ -1140,13 +1156,36 @@ export default function ExamBuilder({
                           })
                         )}
                         {!isTF && (
-                          <button 
-                            type="button" 
-                            onClick={() => handleAddOption(q.id)}
-                            className="text-indigo-600 hover:text-indigo-800 text-xs font-bold text-left self-start mt-1.5 flex items-center gap-1 cursor-pointer"
-                          >
-                            + Agregar opción de respuesta
-                          </button>
+                          <div className="flex flex-col gap-2 mt-1.5">
+                            <button 
+                              type="button" 
+                              onClick={() => handleAddOption(q.id)}
+                              className="text-indigo-600 hover:text-indigo-800 text-xs font-bold text-left self-start flex items-center gap-1 cursor-pointer"
+                            >
+                              + Agregar opción de respuesta
+                            </button>
+
+                            {isCheck && (
+                              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
+                                <span className="font-bold text-slate-600">Máx. respuestas seleccionables:</span>
+                                <select
+                                  value={q.maxSeleccionables || 3}
+                                  onChange={e => handleUpdateMaxSeleccionables(q.id, Number(e.target.value))}
+                                  className="p-1 px-2 font-bold border border-slate-200 rounded-lg bg-slate-50 text-indigo-700 text-xs cursor-pointer focus:border-indigo-400 outline-none"
+                                >
+                                  <option value={1}>HASTA 1 RESPUESTA</option>
+                                  <option value={2}>HASTA 2 RESPUESTAS</option>
+                                  <option value={3}>HASTA 3 RESPUESTAS (PREDETERMINADO)</option>
+                                  <option value={4}>HASTA 4 RESPUESTAS</option>
+                                  <option value={5}>HASTA 5 RESPUESTAS</option>
+                                  <option value={99}>SIN LÍMITE (TODAS)</option>
+                                </select>
+                                <span className={`text-[11px] font-bold ${q.correctas.length > (q.maxSeleccionables || 3) ? 'text-rose-600' : 'text-slate-500'}`}>
+                                  ({q.correctas.length}/{q.maxSeleccionables || 3} marcadas como correctas)
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
                     )}
@@ -1638,8 +1677,8 @@ export default function ExamBuilder({
                         onChange={e => handleChangeQType(q.id, e.target.value as Question['tipo'])}
                         className="text-xs p-1.5 font-bold border rounded-lg bg-slate-50 text-slate-600 cursor-pointer"
                       >
-                        <option value="multiple">Opción múltiple</option>
-                        <option value="checkbox">Opción de Casillas</option>
+                        <option value="multiple">Opción múltiple (1 sola respuesta)</option>
+                        <option value="checkbox">Opción de Casillas (Múltiples respuestas: Hasta {q.maxSeleccionables || 3})</option>
                         <option value="dropdown">Menú desplegable</option>
                         <option value="tf">Verdadero/Falso</option>
                         <option value="abierta">Respuesta libre/Texto</option>

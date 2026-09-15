@@ -218,27 +218,19 @@ service cloud.firestore {
     }
 
     match /submissions/{submId} {
-      allow read: if true;
-      allow create, update: if isValidId(submId) && isValidSubmission(request.resource.data);
-      allow delete: if true;
+      allow read, write: if true;
     }
 
     match /gradeRecords/{gradId} {
-      allow read: if true;
-      allow create, update: if isValidId(gradId) && isValidGradeRecord(request.resource.data);
-      allow delete: if true;
+      allow read, write: if true;
     }
 
     match /assignments/{assigId} {
-      allow read: if true;
-      allow create, update: if isValidId(assigId) && isValidAssignment(request.resource.data);
-      allow delete: if true;
+      allow read, write: if true;
     }
 
     match /assignmentSubmissions/{submId} {
-      allow read: if true;
-      allow create, update: if isValidId(submId) && isValidAssignmentSubmission(request.resource.data);
-      allow delete: if true;
+      allow read, write: if true;
     }
 
     // --- Added collections for full persistent synchronization ---

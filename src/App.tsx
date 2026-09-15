@@ -52,7 +52,8 @@ import {
   mergeStates,
   uid,
   now,
-  generateStudentCode
+  generateStudentCode,
+  AppState
 } from './lib/db';
 import { bioCosmicSynth } from './lib/audioEngine';
 import { 
@@ -62,7 +63,8 @@ import {
   initializeSyncCache,
   fullBidirectionalSync,
   registerDeletedId,
-  saveDocToFirestore
+  saveDocToFirestore,
+  deleteDocFromFirestore
 } from './lib/firebase';
 
 import Header from './components/Header';
@@ -95,9 +97,45 @@ import PasswordRecoveryModal from './components/PasswordRecoveryModal';
 import UserProfileModal from './components/UserProfileModal';
 import StudentRegisterModal from './components/StudentRegisterModal';
 
+function purgeLegacyMockAdmin(state: AppState): AppState {
+  const needsPurge = state.users.some(u => 
+    u.email?.toLowerCase() === 'admin@synapsis.edu' || 
+    u.id === 'admin-fallback-id' ||
+    u.nombre === 'Administrador Synapsis'
+  );
+  if (!needsPurge) return state;
+
+  registerDeletedId('admin-fallback-id', 'users');
+  deleteDocFromFirestore('users', 'admin-fallback-id').catch(() => {});
+
+  const cleanedUsers = state.users.filter(u => 
+    u.email?.toLowerCase() !== 'admin@synapsis.edu' && 
+    u.id !== 'admin-fallback-id' &&
+    u.nombre !== 'Administrador Synapsis'
+  );
+
+  const hasAdmin = cleanedUsers.some(u => u.rol === 'admin');
+  if (!hasAdmin) {
+    const realAdmin: User = {
+      id: 'admin-user-id',
+      nombre: 'Administrador',
+      email: 'soporteyabi@gmail.com',
+      pass: 'admin123',
+      rol: 'admin',
+      creado: new Date().toISOString()
+    };
+    cleanedUsers.unshift(realAdmin);
+    saveDocToFirestore('users', realAdmin).catch(() => {});
+  }
+
+  const updated = { ...state, users: cleanedUsers };
+  saveState(updated);
+  return updated;
+}
+
 export default function App() {
   // Database States
-  const [db, setDb] = useState(() => getInitialState());
+  const [db, setDb] = useState(() => purgeLegacyMockAdmin(getInitialState()));
   const [isFirebaseLoading, setIsFirebaseLoading] = useState(true);
 
   // Download entire Synapsis Portal database on mount
@@ -108,15 +146,15 @@ export default function App() {
         const remoteDb = await fetchFullStateFromFirestore();
         if (remoteDb) {
           console.log('Successfully loaded state from Cloud Firestore.');
-          const localDb = getInitialState();
-          const mergedDb = mergeStates(localDb, remoteDb);
+          const localDb = purgeLegacyMockAdmin(getInitialState());
+          const mergedDb = purgeLegacyMockAdmin(mergeStates(localDb, remoteDb));
           setDb(mergedDb);
           saveState(mergedDb);
           initializeSyncCache(mergedDb);
         } else {
           // No remote database found, let's seed with current default list
           console.log('Firestore dataset is empty. Writing initial educational seed...');
-          const localSeed = getInitialState();
+          const localSeed = purgeLegacyMockAdmin(getInitialState());
           await seedFirestore(localSeed);
           setDb(localSeed);
           saveState(localSeed);
@@ -135,10 +173,49 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('instituto_currentUser');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return null; }
+      try { 
+        const parsed = JSON.parse(saved);
+        if (parsed && (
+          parsed.email?.toLowerCase() === 'admin@synapsis.edu' || 
+          parsed.id === 'admin-fallback-id' ||
+          parsed.nombre === 'Administrador Synapsis'
+        )) {
+          const migrated: User = {
+            id: 'admin-user-id',
+            nombre: 'Administrador',
+            email: 'soporteyabi@gmail.com',
+            pass: 'admin123',
+            rol: 'admin',
+            creado: new Date().toISOString()
+          };
+          localStorage.setItem('instituto_currentUser', JSON.stringify(migrated));
+          return migrated;
+        }
+        return parsed;
+      } catch (e) { return null; }
     }
     return null;
   });
+
+  // Automatic migration for active session if user was logged in as mock superadmin
+  useEffect(() => {
+    if (currentUser && (
+      currentUser.email?.toLowerCase() === 'admin@synapsis.edu' ||
+      currentUser.id === 'admin-fallback-id' ||
+      currentUser.nombre === 'Administrador Synapsis'
+    )) {
+      const realAdmin: User = {
+        id: 'admin-user-id',
+        nombre: 'Administrador',
+        email: 'soporteyabi@gmail.com',
+        pass: 'admin123',
+        rol: 'admin',
+        creado: new Date().toISOString()
+      };
+      setCurrentUser(realAdmin);
+      localStorage.setItem('instituto_currentUser', JSON.stringify(realAdmin));
+    }
+  }, [currentUser]);
 
   // UI States
   const [activeTab, setActiveTab] = useState<string>(() => {
@@ -400,7 +477,7 @@ export default function App() {
     if (!matchedUser) {
       // Fallback self-healing system for demonstration/seed users
       const defaultUsers: User[] = [
-        { id: 'admin-fallback-id', nombre: 'Administrador Synapsis', email: 'admin@synapsis.edu', pass: 'admin123', rol: 'admin', creado: new Date().toISOString() },
+        { id: 'admin-user-id', nombre: 'Administrador', email: 'soporteyabi@gmail.com', pass: 'admin123', rol: 'admin', creado: new Date().toISOString() },
         { id: 'docente-fallback-id', nombre: 'Prof. de Jesús María García', email: 'juan.docente@synapsis.edu', pass: 'docente123', rol: 'docente', creado: new Date().toISOString() },
         { id: 'estudiante1-fallback-id', nombre: 'Carlos Andrés Pérez', email: 'maria.estudiante@synapsis.edu', pass: 'estudiante123', rol: 'estudiante', creado: new Date().toISOString() },
         { id: 'estudiante2-fallback-id', nombre: 'Ana Isabel Rodríguez', email: 'ana.estudiante@synapsis.edu', pass: 'estudiante123', rol: 'estudiante', creado: new Date().toISOString() },
@@ -444,7 +521,7 @@ export default function App() {
       let matchedUser = db.users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
       if (!matchedUser) {
         const defaultUsers: User[] = [
-          { id: 'admin-fallback-id', nombre: 'Administrador Synapsis', email: 'admin@synapsis.edu', pass: 'admin123', rol: 'admin', creado: new Date().toISOString() },
+          { id: 'admin-user-id', nombre: 'Administrador', email: 'soporteyabi@gmail.com', pass: 'admin123', rol: 'admin', creado: new Date().toISOString() },
           { id: 'docente-fallback-id', nombre: 'Prof. de Jesús María García', email: 'juan.docente@synapsis.edu', pass: 'docente123', rol: 'docente', creado: new Date().toISOString() },
           { id: 'estudiante1-fallback-id', nombre: 'Carlos Andrés Pérez', email: 'maria.estudiante@synapsis.edu', pass: 'estudiante123', rol: 'estudiante', creado: new Date().toISOString() },
           { id: 'estudiante2-fallback-id', nombre: 'Ana Isabel Rodríguez', email: 'ana.estudiante@synapsis.edu', pass: 'estudiante123', rol: 'estudiante', creado: new Date().toISOString() },
@@ -966,24 +1043,33 @@ export default function App() {
                   </div>
 
                   <div className="space-y-2">
-                    <button 
-                      type="button"
-                      onClick={() => handleQuickLogin('admin@synapsis.edu', 'admin123')}
-                      className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-900/90 hover:bg-indigo-950/40 hover:border-indigo-500/60 transition-all text-left flex items-center justify-between group cursor-pointer shadow-xs"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                          <ShieldCheck className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span className="text-xs font-bold text-white block leading-snug">Administrador</span>
-                          <span className="text-[10px] text-slate-400 font-mono">admin@synapsis.edu</span>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-bold text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-                        Control Total
-                      </span>
-                    </button>
+                    {(() => {
+                      const adminAccount = db.users.find(u => u.rol === 'admin') || {
+                        nombre: 'Administrador',
+                        email: 'soporteyabi@gmail.com',
+                        pass: 'admin123'
+                      };
+                      return (
+                        <button 
+                          type="button"
+                          onClick={() => handleQuickLogin(adminAccount.email, adminAccount.pass || 'admin123')}
+                          className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-900/90 hover:bg-indigo-950/40 hover:border-indigo-500/60 transition-all text-left flex items-center justify-between group cursor-pointer shadow-xs"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              <ShieldCheck className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <span className="text-xs font-bold text-white block leading-snug">{adminAccount.nombre || 'Administrador'}</span>
+                              <span className="text-[10px] text-slate-400 font-mono">{adminAccount.email}</span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                            Control Total
+                          </span>
+                        </button>
+                      );
+                    })()}
 
                     <button 
                       type="button"
@@ -1439,11 +1525,83 @@ export default function App() {
               semesters={db.semesters}
               currentUser={currentUser}
               onExit={() => setActiveTakeExamId(null)}
-              onSubmit={(sub) => {
-                // Prepend new submittal
+              onSubmit={async (sub) => {
+                // 1. Direct Cloud Firestore persistence for submission record
+                try {
+                  await saveDocToFirestore('submissions', sub);
+                } catch (err) {
+                  console.error('Error saving submission to Firestore:', err);
+                }
+
+                // 2. Prepend new submittal to state
                 const nextSubs = [sub, ...db.submissions];
                 updateSubmissions(nextSubs);
-                showToast('Examen enviado y guardado correctamente en la base de datos', 'success');
+
+                // 3. Automatically link and persist grade record in gradeRecords
+                try {
+                  const examObj = db.exams.find(e => e.id === sub.examenId);
+                  const subjectObj = db.subjects.find(s => 
+                    s.id === examObj?.materia || 
+                    s.nombre.trim().toLowerCase() === (examObj?.materia || '').trim().toLowerCase()
+                  );
+                  const subjectId = subjectObj?.id || examObj?.materia || '';
+                  const parcialId = examObj?.parcialId || db.parciales[0]?.id || '';
+
+                  // Institutional 0.0 - 5.0 scale
+                  const gradeVal = Math.round(((sub.puntaje || 0) / 100) * 5.0 * 10) / 10;
+                  const isEV1 = /evaluaci[oó]n\s*i\b/i.test(examObj?.titulo || '') || /(parcial|evaluacion|ev)\s*1\b/i.test(examObj?.titulo || '');
+                  const isEV2 = /evaluaci[oó]n\s*ii\b/i.test(examObj?.titulo || '') || /(parcial|evaluacion|ev)\s*2\b/i.test(examObj?.titulo || '');
+
+                  const existingGradeIdx = db.gradeRecords.findIndex(g => 
+                    g.estudianteId === sub.estudianteId &&
+                    (g.asignaturaId === subjectId || g.asignaturaId === examObj?.materia) &&
+                    (!parcialId || g.parcialId === parcialId)
+                  );
+
+                  let nextGradeRecords = [...db.gradeRecords];
+                  let targetGradeRecord: GradeRecord;
+
+                  if (existingGradeIdx >= 0) {
+                    const existing = nextGradeRecords[existingGradeIdx];
+                    const n1 = isEV1 ? gradeVal : (existing.notaEV1 !== undefined ? existing.notaEV1 : existing.nota);
+                    const n2 = isEV2 ? gradeVal : (existing.notaEV2 !== undefined ? existing.notaEV2 : existing.nota);
+                    const nT = existing.notaTrabajo !== undefined ? existing.notaTrabajo : existing.nota;
+                    const finalNota = Math.round(((n1 * 0.35) + (n2 * 0.35) + (nT * 0.30)) * 10) / 10;
+
+                    targetGradeRecord = {
+                      ...existing,
+                      notaEV1: n1,
+                      notaEV2: n2,
+                      notaTrabajo: nT,
+                      nota: finalNota,
+                      aprobado: finalNota >= 3.0,
+                      actualizado: new Date().toISOString()
+                    };
+                    nextGradeRecords[existingGradeIdx] = targetGradeRecord;
+                  } else {
+                    targetGradeRecord = {
+                      id: uid(),
+                      estudianteId: sub.estudianteId,
+                      asignaturaId: subjectId,
+                      parcialId: parcialId,
+                      nota: gradeVal,
+                      notaEV1: isEV1 ? gradeVal : (isEV2 ? 0 : gradeVal),
+                      notaEV2: isEV2 ? gradeVal : 0,
+                      notaTrabajo: 3.0,
+                      aprobado: gradeVal >= 3.0,
+                      creado: new Date().toISOString(),
+                      actualizado: new Date().toISOString()
+                    };
+                    nextGradeRecords = [targetGradeRecord, ...nextGradeRecords];
+                  }
+
+                  updateGradeRecords(nextGradeRecords);
+                  await saveDocToFirestore('gradeRecords', targetGradeRecord);
+                } catch (gradeErr) {
+                  console.error('Error synchronizing exam submission to grade records:', gradeErr);
+                }
+
+                showToast('Examen enviado y guardado exitosamente en el registro académico ✓', 'success');
               }}
               toast={showToast}
             />

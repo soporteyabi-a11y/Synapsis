@@ -149,6 +149,7 @@ export interface Question {
       correctOptionIdx?: number; // Para espacios por llenar, apunta a la opciones
     }[];
   }[];
+  maxSeleccionables?: number; // Límite de respuestas seleccionables en casillas (por defecto 3)
 }
 
 export interface Exam {

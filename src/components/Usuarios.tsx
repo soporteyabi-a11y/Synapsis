@@ -122,13 +122,13 @@ export default function Usuarios({ currentUser, users, subjects, semesters, onUp
   };
 
   const handleDeleteUser = (id: string) => {
-    if (id === currentUser.id) {
-      toast('No puedes eliminar tu propia cuenta activa', 'error');
-      return;
-    }
     const nextUsers = users.filter(u => u.id !== id);
     onUpdateUsers(nextUsers);
     toast('Usuario eliminado del sistema correctamente', 'success');
+    if (id === currentUser.id) {
+      localStorage.removeItem('instituto_currentUser');
+      window.location.reload();
+    }
   };
 
   return (
@@ -247,8 +247,8 @@ export default function Usuarios({ currentUser, users, subjects, semesters, onUp
                     );
                   } else {
                     relationshipContent = (
-                      <span className="text-[10px] text-rose-600 font-extrabold bg-rose-50/50 px-2 py-0.5 rounded border border-rose-100 uppercase">
-                        Superusuario
+                      <span className="text-[11px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                        Administración
                       </span>
                     );
                   }
@@ -296,34 +296,32 @@ export default function Usuarios({ currentUser, users, subjects, semesters, onUp
                           >
                             <KeyRound className="w-3.5 h-3.5" />
                           </button>
-                          {!isCurrent && (
-                            confirmDeleteId === u.id ? (
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => {
-                                    handleDeleteUser(u.id);
-                                    setConfirmDeleteId(null);
-                                  }}
-                                  className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-rose-600 text-white hover:bg-rose-700 cursor-pointer"
-                                >
-                                  Sí
-                                </button>
-                                <button
-                                  onClick={() => setConfirmDeleteId(null)}
-                                  className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 cursor-pointer"
-                                >
-                                  No
-                                </button>
-                               </div>
-                            ) : (
+                          {confirmDeleteId === u.id ? (
+                            <div className="flex items-center gap-1">
                               <button
-                                onClick={() => setConfirmDeleteId(u.id)}
-                                className="p-1 rounded border border-rose-225 bg-rose-50 text-rose-600 hover:bg-rose-100 cursor-pointer"
-                                title="Eliminar usuario"
+                                onClick={() => {
+                                  handleDeleteUser(u.id);
+                                  setConfirmDeleteId(null);
+                                }}
+                                className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-rose-600 text-white hover:bg-rose-700 cursor-pointer"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                Sí
                               </button>
-                            )
+                              <button
+                                onClick={() => setConfirmDeleteId(null)}
+                                className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 cursor-pointer"
+                              >
+                                No
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmDeleteId(u.id)}
+                              className="p-1 rounded border border-rose-225 bg-rose-50 text-rose-600 hover:bg-rose-100 cursor-pointer"
+                              title={isCurrent ? "Eliminar mi cuenta" : "Eliminar usuario"}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           )}
                         </div>
                       </td>

@@ -167,6 +167,12 @@ export default function ExamTakeScreen({
     if (list.includes(valIdx)) {
       nextList = list.filter(item => item !== valIdx);
     } else {
+      const q = questions.find(item => item.id === qid);
+      const max = q?.maxSeleccionables || 3;
+      if (list.length >= max) {
+        toast(`Puedes seleccionar un máximo de ${max} respuestas para esta pregunta`, 'warning');
+        return;
+      }
       nextList = [...list, valIdx];
     }
     handleSetAnswer(qid, nextList);
@@ -338,12 +344,18 @@ export default function ExamTakeScreen({
 
     setResultsState(submission);
     setShowConfirmModal(false);
+    clearPersistedData();
+
+    // Persist submission immediately to avoid loss if student closes tab or window
+    try {
+      onSubmit(submission);
+    } catch (err) {
+      console.error('Error submitting exam:', err);
+    }
 
     if (exam.mostrarNota) {
       setShowResultModal(true);
     } else {
-      clearPersistedData();
-      onSubmit(submission);
       toast('Examen enviado exitosamente ✓', 'success');
       onExit();
     }
@@ -351,9 +363,6 @@ export default function ExamTakeScreen({
 
   const handleCloseResultsModal = () => {
     clearPersistedData();
-    if (resultsState) {
-      onSubmit(resultsState);
-    }
     setShowResultModal(false);
     onExit();
   };
@@ -624,31 +633,36 @@ export default function ExamTakeScreen({
 
                   {/* Checkboxes items list */}
                   {qItem.tipo === 'checkbox' && (
-                    qItem.opciones.map((opt, oIdx) => {
-                      const answersList: number[] = answers[qItem.id] || [];
-                      const isChecked = answersList.includes(oIdx);
-                      return (
-                        <div 
-                          key={oIdx}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleCheckbox(qItem.id, oIdx);
-                          }}
-                          className="flex items-center gap-3 py-2 px-1 hover:bg-slate-50 rounded-md transition duration-150 cursor-pointer group"
-                        >
-                          <div className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center transition-all shrink-0 ${
-                            isChecked 
-                              ? 'border-[#673ab7] bg-[#673ab7] text-white' 
-                              : 'border-[#5f6368] bg-transparent group-hover:border-[#202124]'
-                          }`}>
-                            {isChecked && (
-                              <Check className="w-3.5 h-3.5 stroke-[3px]" />
-                            )}
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-2">
+                        <span>(Selecciona hasta {qItem.maxSeleccionables || 3} respuestas: {(answers[qItem.id] || []).length}/{qItem.maxSeleccionables || 3} seleccionadas)</span>
+                      </div>
+                      {qItem.opciones.map((opt, oIdx) => {
+                        const answersList: number[] = answers[qItem.id] || [];
+                        const isChecked = answersList.includes(oIdx);
+                        return (
+                          <div 
+                            key={oIdx}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleCheckbox(qItem.id, oIdx);
+                            }}
+                            className="flex items-center gap-3 py-2 px-1 hover:bg-slate-50 rounded-md transition duration-150 cursor-pointer group"
+                          >
+                            <div className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center transition-all shrink-0 ${
+                              isChecked 
+                                ? 'border-[#673ab7] bg-[#673ab7] text-white' 
+                                : 'border-[#5f6368] bg-transparent group-hover:border-[#202124]'
+                            }`}>
+                              {isChecked && (
+                                <Check className="w-3.5 h-3.5 stroke-[3px]" />
+                              )}
+                            </div>
+                            <span className="text-[#202124] text-sm leading-relaxed font-normal whitespace-pre-wrap">{opt}</span>
                           </div>
-                          <span className="text-[#202124] text-sm leading-relaxed font-normal whitespace-pre-wrap">{opt}</span>
-                        </div>
-                      );
-                    })
+                        );
+                      })}
+                    </div>
                   )}
 
                   {/* Dropdown menu */}

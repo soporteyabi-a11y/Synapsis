@@ -165,7 +165,7 @@ export function generateSemesterCode(nombre: string, existingSemesters: Semester
   return code;
 }
 
-interface AppState {
+export interface AppState {
   users: User[];
   institutions: Institution[];
   subjects: Subject[];
@@ -179,13 +179,13 @@ interface AppState {
 }
 
 function buildDefaultSeedData(): AppState {
-  const uAdminId = 'admin-fallback-id';
+  const uAdminId = 'admin-user-id';
   const uDocenteId = 'docente-fallback-id';
   const uEstudiante1Id = 'estudiante1-fallback-id';
   const uEstudiante2Id = 'estudiante2-fallback-id';
 
   const defaultUsers: User[] = [
-    { id: uAdminId, nombre: 'Administrador Synapsis', email: 'admin@synapsis.edu', pass: 'admin123', rol: 'admin', creado: now() },
+    { id: uAdminId, nombre: 'Administrador', email: 'soporteyabi@gmail.com', pass: 'admin123', rol: 'admin', creado: now() },
     { id: uDocenteId, nombre: 'Prof. de Jesús María García', email: 'juan.docente@synapsis.edu', pass: 'docente123', rol: 'docente', creado: now() },
     { id: uEstudiante1Id, nombre: 'Carlos Andrés Pérez', email: 'maria.estudiante@synapsis.edu', pass: 'estudiante123', rol: 'estudiante', creado: now() },
     { id: uEstudiante2Id, nombre: 'Ana Isabel Rodríguez', email: 'ana.estudiante@synapsis.edu', pass: 'estudiante123', rol: 'estudiante', creado: now() },
