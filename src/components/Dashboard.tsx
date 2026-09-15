@@ -7,10 +7,11 @@ import React, { useState } from 'react';
 import { 
   BookOpen, CheckSquare, Users, Award, 
   HelpCircle, XCircle, TrendingUp, Sparkles, FileSpreadsheet,
-  Compass, Leaf, Star
+  Compass, Leaf, Star, Trash2
 } from 'lucide-react';
 import { User, Exam, Submission } from '../types';
 import { avatarColor, avatarLetter, fmtDate } from '../lib/db';
+import { deleteDocFromFirestore, registerDeletedId } from '../lib/firebase';
 
 interface DashboardProps {
   currentUser: User;
@@ -20,6 +21,8 @@ interface DashboardProps {
   onNavigate: (pageId: string) => void;
   onTakeExam?: (examId: string) => void;
   theme?: string;
+  onUpdateSubmissions?: (updated: Submission[]) => void;
+  toast?: (msg: string, type: 'success' | 'error' | 'warning') => void;
 }
 
 const natureQuotes = [
@@ -35,7 +38,17 @@ const natureQuotes = [
   { quote: "Admira la constelación lejana y aprende su lección: iluminar la inmensa noche con humilde silencio activo.", author: "Sabiduría del Cosmos" }
 ];
 
-export default function Dashboard({ currentUser, users, exams, submissions, onNavigate, onTakeExam, theme }: DashboardProps) {
+export default function Dashboard({ 
+  currentUser, 
+  users, 
+  exams, 
+  submissions, 
+  onNavigate, 
+  onTakeExam, 
+  theme,
+  onUpdateSubmissions,
+  toast
+}: DashboardProps) {
   const rol = currentUser.rol;
   const allMyUserIds = users 
     ? users.filter(u => u.nombre === currentUser.nombre || u.email.toLowerCase() === currentUser.email.toLowerCase()).map(u => u.id)
@@ -43,6 +56,27 @@ export default function Dashboard({ currentUser, users, exams, submissions, onNa
   const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * natureQuotes.length));
   const [subsPage, setSubsPage] = useState(1);
   const [examsPage, setExamsPage] = useState(1);
+  const [confirmDeleteSubId, setConfirmDeleteSubId] = useState<string | null>(null);
+  const [isDeletingSubId, setIsDeletingSubId] = useState<string | null>(null);
+
+  const handleDeleteSubmission = async (subId: string, studentName?: string) => {
+    try {
+      setIsDeletingSubId(subId);
+      const updated = submissions.filter(s => s.id !== subId);
+      if (onUpdateSubmissions) {
+        onUpdateSubmissions(updated);
+      }
+      await registerDeletedId(subId, 'submissions');
+      await deleteDocFromFirestore('submissions', subId);
+      toast?.(`Entrega de ${studentName || 'estudiante'} eliminada correctamente`, 'success');
+    } catch (err) {
+      console.error('Error al eliminar entrega:', err);
+      toast?.('No se pudo eliminar la entrega', 'error');
+    } finally {
+      setIsDeletingSubId(null);
+      setConfirmDeleteSubId(null);
+    }
+  };
 
   const handleNextQuote = () => {
     setQuoteIndex((prev) => (prev + 1) % natureQuotes.length);
@@ -124,15 +158,17 @@ export default function Dashboard({ currentUser, users, exams, submissions, onNa
                       <th className="py-2 px-3">Examen</th>
                       <th className="py-2 px-3">Nota</th>
                       <th className="py-2 px-3">Fecha</th>
+                      <th className="py-2 px-3 text-right">Acción</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {recentSubs.map((sub) => {
                       const student = users.find(u => u.id === sub.estudianteId);
                       const exam = exams.find(e => e.id === sub.examenId);
+                      const studentName = student?.nombre || sub.estudianteNombre || 'Estudiante';
                       return (
                         <tr key={sub.id} className="hover:bg-slate-50/50">
-                          <td className="py-2.5 px-3 font-medium text-slate-800">{student?.nombre || sub.estudianteNombre}</td>
+                          <td className="py-2.5 px-3 font-medium text-slate-800">{studentName}</td>
                           <td className="py-2.5 px-3 text-slate-500 max-w-[150px] truncate">{exam?.titulo || '—'}</td>
                           <td className="py-2.5 px-3">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${sub.aprobado ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
@@ -140,6 +176,39 @@ export default function Dashboard({ currentUser, users, exams, submissions, onNa
                             </span>
                           </td>
                           <td className="py-2.5 px-3 text-xs text-slate-400">{fmtDate(sub.fecha)}</td>
+                          <td className="py-2.5 px-3 text-right">
+                            {confirmDeleteSubId === sub.id ? (
+                              <div className="flex items-center justify-end gap-1 animate-fade-in">
+                                <button
+                                  type="button"
+                                  disabled={isDeletingSubId === sub.id}
+                                  onClick={() => handleDeleteSubmission(sub.id, studentName)}
+                                  className="px-2 py-0.5 text-[10px] font-bold rounded bg-rose-600 text-white hover:bg-rose-700 transition cursor-pointer shadow-xs disabled:opacity-50"
+                                  title="Confirmar eliminación"
+                                >
+                                  {isDeletingSubId === sub.id ? '...' : 'Eliminar'}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isDeletingSubId === sub.id}
+                                  onClick={() => setConfirmDeleteSubId(null)}
+                                  className="px-2 py-0.5 text-[10px] font-semibold rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                                  title="Cancelar"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteSubId(sub.id)}
+                                className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition cursor-pointer inline-flex items-center"
+                                title="Eliminar esta entrega"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </td>
                         </tr>
                       );
                     })}
@@ -266,15 +335,17 @@ export default function Dashboard({ currentUser, users, exams, submissions, onNa
                       <th className="py-2 px-3">Examen</th>
                       <th className="py-2 px-3">Nota</th>
                       <th className="py-2 px-3">Fecha</th>
+                      <th className="py-2 px-3 text-right">Acción</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {myRecentSubs.map((sub) => {
                       const student = users.find(u => u.id === sub.estudianteId);
                       const exam = exams.find(e => e.id === sub.examenId);
+                      const studentName = student?.nombre || sub.estudianteNombre || 'Estudiante';
                       return (
                         <tr key={sub.id} className="hover:bg-slate-50/50">
-                          <td className="py-2.5 px-3 font-medium text-slate-800">{student?.nombre || sub.estudianteNombre}</td>
+                          <td className="py-2.5 px-3 font-medium text-slate-800">{studentName}</td>
                           <td className="py-2.5 px-3 text-slate-500">{exam?.titulo || '—'}</td>
                           <td className="py-2.5 px-3">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${sub.aprobado ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
@@ -282,6 +353,39 @@ export default function Dashboard({ currentUser, users, exams, submissions, onNa
                             </span>
                           </td>
                           <td className="py-2.5 px-3 text-xs text-slate-400">{fmtDate(sub.fecha)}</td>
+                          <td className="py-2.5 px-3 text-right">
+                            {confirmDeleteSubId === sub.id ? (
+                              <div className="flex items-center justify-end gap-1 animate-fade-in">
+                                <button
+                                  type="button"
+                                  disabled={isDeletingSubId === sub.id}
+                                  onClick={() => handleDeleteSubmission(sub.id, studentName)}
+                                  className="px-2 py-0.5 text-[10px] font-bold rounded bg-rose-600 text-white hover:bg-rose-700 transition cursor-pointer shadow-xs disabled:opacity-50"
+                                  title="Confirmar eliminación"
+                                >
+                                  {isDeletingSubId === sub.id ? '...' : 'Eliminar'}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isDeletingSubId === sub.id}
+                                  onClick={() => setConfirmDeleteSubId(null)}
+                                  className="px-2 py-0.5 text-[10px] font-semibold rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                                  title="Cancelar"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteSubId(sub.id)}
+                                className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition cursor-pointer inline-flex items-center"
+                                title="Eliminar esta entrega"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </td>
                         </tr>
                       );
                     })}

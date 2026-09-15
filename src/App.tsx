@@ -479,6 +479,8 @@ export default function App() {
               setActiveEditExamId(null);
             }}
             onTakeExam={(examId) => setActiveTakeExamId(examId)}
+            onUpdateSubmissions={updateSubmissions}
+            toast={showToast}
           />
         );
       case 'misExamenes':

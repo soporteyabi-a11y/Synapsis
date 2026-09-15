@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { User, Exam, Submission } from '../types';
 import { avatarColor, avatarLetter, fmtDate, fmtTime, now } from '../lib/db';
+import { deleteDocFromFirestore, registerDeletedId } from '../lib/firebase';
 
 interface ResultadosProps {
   currentUser: User;
@@ -28,10 +29,29 @@ export default function Resultados({
   const [showDangerZone, setShowDangerZone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [confirmDeleteSubId, setConfirmDeleteSubId] = useState<string | null>(null);
+  const [isDeletingSubId, setIsDeletingSubId] = useState<string | null>(null);
   
   // Local grading scores & comment forms
   const [manualScores, setManualScores] = useState<Record<string, number>>({});
   const [manualComments, setManualComments] = useState<Record<string, string>>({});
+
+  const handleDeleteSubmission = async (subId: string, studentName?: string) => {
+    try {
+      setIsDeletingSubId(subId);
+      const updated = submissions.filter(sub => sub.id !== subId);
+      onUpdateSubmissions(updated);
+      await registerDeletedId(subId, 'submissions');
+      await deleteDocFromFirestore('submissions', subId);
+      toast(`Intento de ${studentName || 'estudiante'} eliminado con éxito`, 'success');
+    } catch (err) {
+      console.error('Error al eliminar entrega:', err);
+      toast('No se pudo eliminar la entrega', 'error');
+    } finally {
+      setIsDeletingSubId(null);
+      setConfirmDeleteSubId(null);
+    }
+  };
 
   const myExams = exams
     .filter(e => e.docenteId === currentUser.id || currentUser.rol === 'admin')
@@ -331,14 +351,16 @@ export default function Resultados({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {currentUser.rol === 'admin' && showDangerZone && examSubs.length > 0 && (
+                    {(currentUser.rol === 'admin' || exam.docenteId === currentUser.id) && showDangerZone && examSubs.length > 0 && (
                       <button
-                        onClick={() => {
-                          if (window.confirm(`¿Estás seguro de que deseas eliminar todas las entregas (${examSubs.length}) para el examen "${exam.titulo}"? Esta acción no se puede deshacer.`)) {
-                            const updated = submissions.filter(s => s.examenId !== exam.id);
-                            onUpdateSubmissions(updated);
-                            toast(`Se han eliminado las entregas para el examen "${exam.titulo}"`, 'success');
+                        onClick={async () => {
+                          const updated = submissions.filter(s => s.examenId !== exam.id);
+                          onUpdateSubmissions(updated);
+                          for (const sub of examSubs) {
+                            registerDeletedId(sub.id, 'submissions');
+                            deleteDocFromFirestore('submissions', sub.id);
                           }
+                          toast(`Se han eliminado las entregas para el examen "${exam.titulo}"`, 'success');
                         }}
                         className="px-2.5 py-1 text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-100 hover:border-rose-300 rounded-lg text-xs font-extrabold flex items-center gap-1 cursor-pointer transition animate-fade-in"
                         title="Eliminar historial completo de este examen"
@@ -441,20 +463,38 @@ export default function Resultados({
                                   >
                                     Ver respuestas
                                   </button>
-                                  {currentUser.rol === 'admin' && showDangerZone && (
-                                    <button 
-                                      onClick={() => {
-                                        if (window.confirm(`¿Seguro que deseas eliminar el intento de ${stName}? Esta acción no se puede deshacer.`)) {
-                                          const updated = submissions.filter(sub => sub.id !== s.id);
-                                          onUpdateSubmissions(updated);
-                                          toast(`Intento de ${stName} eliminado con éxito`, 'success');
-                                        }
-                                      }}
-                                      className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-transparent hover:border-rose-105 rounded-lg transition cursor-pointer"
-                                      title="Eliminar este intento"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
+                                  {(currentUser.rol === 'admin' || exam.docenteId === currentUser.id) && (
+                                    confirmDeleteSubId === s.id ? (
+                                      <div className="flex items-center gap-1 animate-fade-in">
+                                        <button
+                                          type="button"
+                                          disabled={isDeletingSubId === s.id}
+                                          onClick={() => handleDeleteSubmission(s.id, stName)}
+                                          className="px-2 py-0.5 text-[11px] font-bold rounded bg-rose-600 text-white hover:bg-rose-700 transition cursor-pointer shadow-xs disabled:opacity-50"
+                                          title="Confirmar eliminación"
+                                        >
+                                          {isDeletingSubId === s.id ? '...' : 'Eliminar'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={isDeletingSubId === s.id}
+                                          onClick={() => setConfirmDeleteSubId(null)}
+                                          className="px-2 py-0.5 text-[11px] font-semibold rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                                          title="Cancelar"
+                                        >
+                                          Cancelar
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button 
+                                        type="button"
+                                        onClick={() => setConfirmDeleteSubId(s.id)}
+                                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-lg transition cursor-pointer"
+                                        title="Eliminar este intento"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    )
                                   )}
                                 </div>
                               </td>
